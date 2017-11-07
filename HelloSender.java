@@ -26,9 +26,7 @@ class HelloSender implements MessageHandler, Runnable {
 			// TODO: seqNum
 			Message.Hello hello = new Message.Hello(this.local, 0, this.helloInterval);
 			for (PeerTable.Record rec : peerTable.records().values()) {
-				if (rec.state() != PeerTable.State.DYING) {
-					hello.addPeer(rec.id);
-				}
+				hello.addPeer(rec.id);
 			}
 			this.muxDemux.broadcast(hello);
 		}

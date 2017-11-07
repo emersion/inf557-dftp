@@ -18,7 +18,7 @@ class PeerTable {
 
 		protected int lastSeqNum = 0;
 		protected Instant expiresAt = null;
-		protected State state = State.HEARD; // TODO
+		protected State state = State.HEARD;
 
 		protected Record(String id, InetAddress address) {
 			this.id = id;
@@ -46,17 +46,16 @@ class PeerTable {
 		if (rec == null) {
 			rec = new Record(id, address);
 			records.put(id, rec);
+		} else {
+			if (!address.equals(rec.address)) {
+				throw new IllegalArgumentException("got two different IP addresses for the same peer ID");
+			}
+			if (rec.lastSeqNum != seqNum) {
+				rec.state = State.INCONSISTENT;
+			}
 		}
 
-		if (!address.equals(rec.address)) {
-			throw new IllegalArgumentException("got two different IP addresses for the same peer ID");
-		}
-
-		if (rec.lastSeqNum < seqNum) {
-			rec.lastSeqNum = seqNum;
-		}
 		rec.expiresAt = Instant.now().plus(expiration);
-		rec.state = State.HEARD;
 
 		cleanup();
 	}
@@ -66,8 +65,11 @@ class PeerTable {
 		Instant now = Instant.now();
 		for (Record rec : records.values()) {
 			if (now.isAfter(rec.expiresAt)) {
-				rec.state = State.DYING;
+				toRemove.add(rec.id);
 			}
+		}
+		for (String id : toRemove) {
+			records.remove(id);
 		}
 	}
 }
