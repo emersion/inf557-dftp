@@ -136,7 +136,7 @@ abstract class Message {
 		}
 
 		public Syn(String[] parts){
-			if (parts.length != 4) {
+			if (parts.length < 4) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
 
