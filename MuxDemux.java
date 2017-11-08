@@ -63,16 +63,18 @@ class MuxDemux implements Runnable {
 				}
 
 				String raw = new String(packet.getData(), 0, packet.getLength());
+				InetAddress addr = packet.getAddress();
 
 				Message msg;
 				try {
 					msg = Message.parse(raw);
 				} catch (Exception e) {
+					System.err.println("Error while parsing message from "+addr+": "+raw);
 					e.printStackTrace();
 					continue;
 				}
 
-				Envelope e = new Envelope(packet.getAddress(), msg);
+				Envelope e = new Envelope(addr, msg);
 				for (MessageHandler h : handlers) {
 					h.handleMessage(e);
 				}
