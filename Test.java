@@ -1,11 +1,13 @@
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 class Test {
 	private static final int port = 4242;
-	private static final String local = "kurisu";
 	private static final int helloInterval = 1;
 
 	public static void main(String[] args) throws Exception {
+		String local = InetAddress.getLocalHost().getHostName();
+
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
 		PeerTable peerTable = new PeerTable();
