@@ -78,7 +78,7 @@ abstract class Message {
 			try {
 				peersLen = Integer.parseInt(parts[4]);
 			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException(parts[1] + "invalid number of peers : "+e.getMessage());
+				throw new IllegalArgumentException("invalid number of peers : "+e.getMessage());
 			}
 			if (peersLen < 0 || peersLen > 255) {
 				throw new IllegalArgumentException("invalid number of peers: not in range");
@@ -128,7 +128,7 @@ abstract class Message {
 			this.sender = sender;
 
 			if (!idPattern.matcher(peer).matches()) {
-				throw new IllegalArgumentException("invalid sender ID");
+				throw new IllegalArgumentException("invalid peer ID");
 			}
 
 			this.peer = peer;
@@ -136,7 +136,7 @@ abstract class Message {
 		}
 
 		public Syn(String[] parts){
-			if (parts.length < 4) {
+			if (parts.length != 4) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
 
@@ -164,8 +164,7 @@ abstract class Message {
 
 		@Override
 		public String format() {
-			StringBuilder sb = new StringBuilder(SYN+";"+this.sender+";"+ this.peer+";"+this.seqNum+";");
-			return sb.toString();
+			return SYN+";"+this.sender+";"+ this.peer+";"+String.valueOf(this.seqNum)+";";
 		}
 
 		public String toString() {
