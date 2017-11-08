@@ -11,12 +11,13 @@ class Test {
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
 		PeerTable peerTable = new PeerTable();
+		Database db = new Database();
 
 		HelloReceiver helloReceiver = new HelloReceiver(peerTable);
 		new Thread(helloReceiver).start();
 		muxDemux.addHandler(helloReceiver);
 
-		HelloSender helloSender = new HelloSender(muxDemux, peerTable, local, helloInterval);
+		HelloSender helloSender = new HelloSender(muxDemux, peerTable, db, local, helloInterval);
 		new Thread(helloSender).start();
 		muxDemux.addHandler(helloSender);
 
