@@ -21,7 +21,7 @@ abstract class Message {
 		case SYN:
 			return new Syn(parts);
 		case LIST:
-			return new List(parts);
+			return new ListM(parts);
 		default:
 			throw new IllegalArgumentException("unknown message type: "+type);
 		}
@@ -175,7 +175,7 @@ abstract class Message {
 		}
 	}
 
-	public static class List extends Message {
+	public static class ListM extends Message {
 		public final String sender;
 		public final String peer;
 		public final int seqNum;
@@ -183,7 +183,7 @@ abstract class Message {
 		public final int partNum;
 		public final String data;
 
-		public List(String sender, String peer, int seqNum, int totalParts, int partNum, String data){
+		public ListM(String sender, String peer, int seqNum, int totalParts, int partNum, String data){
 			if (!idPattern.matcher(sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
@@ -206,7 +206,7 @@ abstract class Message {
 			this.data = data;
 		}
 
-		public List(String[] parts){
+		public ListM(String[] parts){
 			if(parts.length != 8){
 				throw new IllegalArgumentException("wrong number of fields");
 			}
