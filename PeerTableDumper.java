@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Formatter;
 
 class PeerTableDumper implements Runnable {
 	private ServerSocket servSocket;
@@ -20,12 +21,17 @@ class PeerTableDumper implements Runnable {
   }
 
 	private String makeFancyMessage() {
-		String msg = "----------------------------\n";
-		msg += "Id  | State | seq# \n";
+		// %[argument_index$][flags][width][.precision]conversion
+		StringBuilder sb;
+		Formatter formatter = new Formatter();
+		String msg = "+------------------------------------------------+\n";
+		msg += String.format("| %1$16s | %2$13s | %3$11s |\n", "Id", "State", "Seq#");
+		msg += "+------------------------------------------------+\n";
 		List<PeerTable.Record> records = peerTable.records();
 		for (PeerTable.Record e : records) {
-			msg += "| " + e.id + " | " + e.state() + " | " + e.lastSeqNum + " \n";
+			msg += String.format("| %1$16s | %2$13s | %3$11s |\n", e.id, e.state(), e.lastSeqNum);
 		}
+		msg += "+------------------------------------------------+\n";
 		return msg;
 	}
 
