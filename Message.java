@@ -78,7 +78,7 @@ abstract class Message {
 			try {
 				peersLen = Integer.parseInt(parts[4]);
 			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("invalid number of peers : "+e.getMessage());
+				throw new IllegalArgumentException("invalid number of peers: "+e.getMessage());
 			}
 			if (peersLen < 0 || peersLen > 255) {
 				throw new IllegalArgumentException("invalid number of peers: not in range");
@@ -136,7 +136,7 @@ abstract class Message {
 		}
 
 		public Syn(String[] parts){
-			if (parts.length != 4) {
+			if (parts.length < 5) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
 
