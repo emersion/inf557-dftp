@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Collections;
+import java.util.List;
 import java.util.ArrayList;
 
 class PeerTable {
@@ -36,12 +37,16 @@ class PeerTable {
 
 	private Map<String, Record> records = new HashMap<>();
 
-	public Map<String, Record> records() {
+	public synchronized List<Record> records() {
 		cleanup();
-		return Collections.unmodifiableMap(records);
+		List<Record> list = new ArrayList<>();
+		for (Record rec : records.values()) {
+			list.add(rec);
+		}
+		return list;
 	}
 
-	public void update(String id, InetAddress address, int seqNum) {
+	public synchronized void update(String id, InetAddress address, int seqNum) {
 		Record rec = records.get(id);
 		if (rec == null) {
 			rec = new Record(id, address);
@@ -60,7 +65,7 @@ class PeerTable {
 		cleanup();
 	}
 
-	private void cleanup() {
+	private synchronized void cleanup() {
 		ArrayList<String> toRemove = new ArrayList<>();
 		Instant now = Instant.now();
 		for (Record rec : records.values()) {
