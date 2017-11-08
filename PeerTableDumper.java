@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Formatter;
 
 class PeerTableDumper implements Runnable {
 	private ServerSocket servSocket;
@@ -22,8 +21,6 @@ class PeerTableDumper implements Runnable {
 
 	private String makeFancyMessage() {
 		// %[argument_index$][flags][width][.precision]conversion
-		StringBuilder sb;
-		Formatter formatter = new Formatter();
 		String msg = "+------------------------------------------------+\n";
 		msg += String.format("| %1$16s | %2$13s | %3$11s |\n", "Id", "State", "Seq#");
 		msg += "+------------------------------------------------+\n";
