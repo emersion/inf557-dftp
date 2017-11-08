@@ -7,6 +7,7 @@ abstract class Message {
 
 	private static final String HELLO = "HELLO";
 	private static final String SYN = "SYN";
+	private static final String LIST = "LIST";
 
 	abstract public String format();
 
@@ -19,6 +20,8 @@ abstract class Message {
 			return new Hello(parts);
 		case SYN:
 			return new Syn(parts);
+		case LIST:
+			return new List(parts);
 		default:
 			throw new IllegalArgumentException("unknown message type: "+type);
 		}
@@ -124,13 +127,11 @@ abstract class Message {
 			if (!idPattern.matcher(sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
-
-			this.sender = sender;
-
 			if (!idPattern.matcher(peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
 
+			this.sender = sender;
 			this.peer = peer;
 			this.seqNum = seqNum;
 		}
@@ -174,6 +175,96 @@ abstract class Message {
 		}
 	}
 
+	public static class List extends Message {
+		public final String sender;
+		public final String peer;
+		public final int seqNum;
+		public final int totalParts;
+		public final int partNum;
+		public final String data;
+
+		public List(String sender, String peer, int seqNum, int totalParts, int partNum, String data){
+			if (!idPattern.matcher(sender).matches()) {
+				throw new IllegalArgumentException("invalid sender ID");
+			}
+			if (!idPattern.matcher(peer).matches()) {
+				throw new IllegalArgumentException("invalid peer ID");
+			}
+			if(data.length() > 255){
+				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
+			}
+			// not sure if necessary
+			if(partNum > totalParts){
+				throw new IllegalArgumentException("invalid part number");
+			}
+
+			this.sender = sender;
+			this.peer = peer;
+			this.seqNum = seqNum;
+			this.totalParts = totalParts;
+			this.partNum = partNum;
+			this.data = data;
+		}
+
+		public List(String[] parts){
+			if(parts.length != 8){
+				throw new IllegalArgumentException("wrong number of fields");
+			}
+			if(!LIST.equals(parts[0])){
+				throw new IllegalArgumentException("not a LIST message");
+			}
+
+			this.sender = parts[1];
+			if(!idPattern.matcher(this.sender).matches()){
+				throw new IllegalArgumentException("invalid sender ID");
+			}
+
+			this.peer = parts[2];
+			if(!idPattern.matcher(this.peer).matches()){
+				throw new IllegalArgumentException("invalid peer ID");
+			}
+
+			try{
+				this.seqNum = Integer.parseInt(parts[3]);
+			}catch (NumberFormatException e){
+				throw new IllegalArgumentException("invalid sequence number: "+e.getMessage());
+			}
+
+			try{
+				this.totalParts = Integer.parseInt(parts[4]);
+			}catch (NumberFormatException e){
+				throw new IllegalArgumentException("invalid total parts number: "+e.getMessage());
+			}
+
+			try{
+				this.partNum = Integer.parseInt(parts[5]);
+			}catch (NumberFormatException e){
+				throw new IllegalArgumentException("invalid part number: "+e.getMessage());
+			}
+
+			this.data = parts[6];
+			if(this.data.length() > 255){
+				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
+			}
+		}
+
+		@Override
+		public String format() {
+			return LIST+";"+this.sender+";"+ this.peer+";"+String.valueOf(this.seqNum)+";"+
+					String.valueOf(this.totalParts)+";"+
+					String.valueOf(this.partNum)+";"+
+					this.data+";";
+		}
+
+		public String toString() {
+			return "LIST{sender="+this.sender+
+					" peer="+this.peer+
+					" seqNum="+String.valueOf(this.seqNum)+
+					" totalParts="+String.valueOf(this.totalParts)+
+					" partNum="+String.valueOf(this.partNum)+
+					" data="+this.data+"}";
+		}
+	}
 
 }
 
