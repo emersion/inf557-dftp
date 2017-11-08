@@ -9,16 +9,16 @@ import java.util.Formatter;
 class PeerTableDumper implements Runnable {
 	private ServerSocket servSocket;
 	private PeerTable peerTable;
-  private final int default_backlog_size = 3;
+	private static final int BACKLOG_SIZE = 3;
 
-  public PeerTableDumper(int port, PeerTable pt) {
+	public PeerTableDumper(int port, PeerTable pt) {
 		try {
-			this.servSocket = new ServerSocket(port, default_backlog_size);
+			this.servSocket = new ServerSocket(port, BACKLOG_SIZE);
 			this.peerTable = pt;
 		} catch (IOException e){
 			e.printStackTrace();
 		}
-  }
+	}
 
 	private String makeFancyMessage() {
 		// %[argument_index$][flags][width][.precision]conversion
