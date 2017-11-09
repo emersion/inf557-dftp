@@ -192,7 +192,11 @@ abstract class Message {
 			if(data.length() > 255) {
 				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
 			}
-			// not sure if necessary
+
+			if(totalParts <= 0) {
+				throw new IllegalArgumentException("invalid total parts number (isn't positive)");
+			}
+
 			if(partNum < 0 || partNum >= totalParts) {
 				throw new IllegalArgumentException("invalid part number");
 			}
@@ -235,10 +239,18 @@ abstract class Message {
 				throw new IllegalArgumentException("invalid total parts number: "+e.getMessage());
 			}
 
+			if(totalParts <= 0) {
+				throw new IllegalArgumentException("invalid total parts number (isn't positive)");
+			}
+
 			try {
 				this.partNum = Integer.parseInt(parts[5]);
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("invalid part number: "+e.getMessage());
+			}
+
+			if(partNum < 0 || partNum >= totalParts) {
+				throw new IllegalArgumentException("invalid part number");
 			}
 
 			this.data = parts[6];
