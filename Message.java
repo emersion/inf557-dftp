@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
 abstract class Message {
@@ -21,7 +20,7 @@ abstract class Message {
 		case SYN:
 			return new Syn(parts);
 		case LIST:
-			return new ListM(parts);
+			return new List(parts);
 		default:
 			throw new IllegalArgumentException("unknown message type: "+type);
 		}
@@ -31,7 +30,7 @@ abstract class Message {
 		public final String sender;
 		public final int seqNum;
 		public final int helloInterval;
-		private final List<String> peers = new ArrayList<>();
+		private final java.util.List<String> peers = new ArrayList<>();
 
 		public Hello(String sender, int seqNum, int helloInterval) {
 			if (!idPattern.matcher(sender).matches()) {
@@ -175,7 +174,7 @@ abstract class Message {
 		}
 	}
 
-	public static class ListM extends Message {
+	public static class List extends Message {
 		public final String sender;
 		public final String peer;
 		public final int seqNum;
@@ -183,7 +182,7 @@ abstract class Message {
 		public final int partNum;
 		public final String data;
 
-		public ListM(String sender, String peer, int seqNum, int totalParts, int partNum, String data){
+		public List(String sender, String peer, int seqNum, int totalParts, int partNum, String data){
 			if (!idPattern.matcher(sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
@@ -194,7 +193,7 @@ abstract class Message {
 				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
 			}
 			// not sure if necessary
-			if(partNum > totalParts){
+			if(partNum < 0 || partNum >= totalParts){
 				throw new IllegalArgumentException("invalid part number");
 			}
 
@@ -206,7 +205,7 @@ abstract class Message {
 			this.data = data;
 		}
 
-		public ListM(String[] parts){
+		public List(String[] parts){
 			if(parts.length != 8){
 				throw new IllegalArgumentException("wrong number of fields");
 			}
