@@ -135,7 +135,7 @@ abstract class Message {
 			this.seqNum = seqNum;
 		}
 
-		public Syn(String[] parts){
+		public Syn(String[] parts) {
 			if (parts.length < 5) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
@@ -150,7 +150,7 @@ abstract class Message {
 			}
 
 			this.peer = parts[2];
-			if(!idPattern.matcher(this.peer).matches()){
+			if(!idPattern.matcher(this.peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
 
@@ -182,18 +182,18 @@ abstract class Message {
 		public final int partNum;
 		public final String data;
 
-		public List(String sender, String peer, int seqNum, int totalParts, int partNum, String data){
+		public List(String sender, String peer, int seqNum, int totalParts, int partNum, String data) {
 			if (!idPattern.matcher(sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
 			if (!idPattern.matcher(peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
-			if(data.length() > 255){
+			if(data.length() > 255) {
 				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
 			}
 			// not sure if necessary
-			if(partNum < 0 || partNum >= totalParts){
+			if(partNum < 0 || partNum >= totalParts) {
 				throw new IllegalArgumentException("invalid part number");
 			}
 
@@ -205,44 +205,44 @@ abstract class Message {
 			this.data = data;
 		}
 
-		public List(String[] parts){
-			if(parts.length != 8){
+		public List(String[] parts) {
+			if(parts.length != 8) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
-			if(!LIST.equals(parts[0])){
+			if(!LIST.equals(parts[0])) {
 				throw new IllegalArgumentException("not a LIST message");
 			}
 
 			this.sender = parts[1];
-			if(!idPattern.matcher(this.sender).matches()){
+			if(!idPattern.matcher(this.sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
 
 			this.peer = parts[2];
-			if(!idPattern.matcher(this.peer).matches()){
+			if(!idPattern.matcher(this.peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
 
-			try{
+			try {
 				this.seqNum = Integer.parseInt(parts[3]);
-			}catch (NumberFormatException e){
+			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("invalid sequence number: "+e.getMessage());
 			}
 
-			try{
+			try {
 				this.totalParts = Integer.parseInt(parts[4]);
-			}catch (NumberFormatException e){
+			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("invalid total parts number: "+e.getMessage());
 			}
 
-			try{
+			try {
 				this.partNum = Integer.parseInt(parts[5]);
-			}catch (NumberFormatException e){
+			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("invalid part number: "+e.getMessage());
 			}
 
 			this.data = parts[6];
-			if(this.data.length() > 255){
+			if(this.data.length() > 255) {
 				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
 			}
 		}
