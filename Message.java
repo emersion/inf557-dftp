@@ -150,7 +150,7 @@ abstract class Message {
 			}
 
 			this.peer = parts[2];
-			if(!idPattern.matcher(this.peer).matches()) {
+			if (!idPattern.matcher(this.peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
 
@@ -186,18 +186,20 @@ abstract class Message {
 			if (!idPattern.matcher(sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
+
 			if (!idPattern.matcher(peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
-			if(data.length() > 255) {
+
+			if (data.length() > 255) {
 				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
 			}
 
-			if(totalParts <= 0) {
+			if (totalParts <= 0) {
 				throw new IllegalArgumentException("invalid total parts number (isn't positive)");
 			}
 
-			if(partNum < 0 || partNum >= totalParts) {
+			if (partNum < 0 || partNum >= totalParts) {
 				throw new IllegalArgumentException("invalid part number");
 			}
 
@@ -210,20 +212,20 @@ abstract class Message {
 		}
 
 		public List(String[] parts) {
-			if(parts.length != 8) {
+			if (parts.length != 8) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
-			if(!LIST.equals(parts[0])) {
+			if (!LIST.equals(parts[0])) {
 				throw new IllegalArgumentException("not a LIST message");
 			}
 
 			this.sender = parts[1];
-			if(!idPattern.matcher(this.sender).matches()) {
+			if (!idPattern.matcher(this.sender).matches()) {
 				throw new IllegalArgumentException("invalid sender ID");
 			}
 
 			this.peer = parts[2];
-			if(!idPattern.matcher(this.peer).matches()) {
+			if (!idPattern.matcher(this.peer).matches()) {
 				throw new IllegalArgumentException("invalid peer ID");
 			}
 
@@ -239,7 +241,7 @@ abstract class Message {
 				throw new IllegalArgumentException("invalid total parts number: "+e.getMessage());
 			}
 
-			if(totalParts <= 0) {
+			if (totalParts <= 0) {
 				throw new IllegalArgumentException("invalid total parts number (isn't positive)");
 			}
 
@@ -249,12 +251,12 @@ abstract class Message {
 				throw new IllegalArgumentException("invalid part number: "+e.getMessage());
 			}
 
-			if(partNum < 0 || partNum >= totalParts) {
+			if (partNum < 0 || partNum >= totalParts) {
 				throw new IllegalArgumentException("invalid part number");
 			}
 
 			this.data = parts[6];
-			if(this.data.length() > 255) {
+			if (this.data.length() > 255) {
 				throw new IllegalArgumentException("invalid data size (more than 255 chars)");
 			}
 		}
