@@ -17,7 +17,7 @@ class PeerTable {
 		public final String id;
 		public final InetAddress address;
 
-		protected int pendingSeqNum = 0;
+		protected int pendingSeqNum = Integer.MIN_VALUE;
 		protected Instant expiresAt = null;
 		protected State state = State.HEARD;
 		protected Database db = null;
