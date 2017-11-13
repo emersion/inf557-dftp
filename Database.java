@@ -1,11 +1,8 @@
 class Database {
-	private String[] data;
-	private int seqNum;
+	private String[] data = new String[0];
+	private int seqNum = Integer.MIN_VALUE;
 
-	public Database() {
-		this.data = new String[0];
-		this.seqNum = Integer.MIN_VALUE;
-	}
+	public Database() {}
 
 	public Database(String[] data, int seqNum) {
 		this.data = data;

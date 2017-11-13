@@ -12,7 +12,7 @@ class Test {
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
 		PeerTable peerTable = new PeerTable();
-		Database db = new Database();
+		Database db = new Database(new String[]{"Hello", "World"}, 0);
 
 		HelloReceiver helloReceiver = new HelloReceiver(peerTable);
 		new Thread(helloReceiver).start();
@@ -22,13 +22,17 @@ class Test {
 		new Thread(helloSender).start();
 		muxDemux.addHandler(helloSender);
 
-		SynSender synSender = new SynSender(muxDemux, peerTable, local, synInterval);
-		new Thread(synSender).start();
-		muxDemux.addHandler(synSender);
-
 		ListSender listSender = new ListSender(muxDemux, peerTable, db, local);
 		new Thread(listSender).start();
 		muxDemux.addHandler(listSender);
+
+		ListReceiver listReceiver = new ListReceiver(peerTable, local);
+		new Thread(listReceiver).start();
+		muxDemux.addHandler(listReceiver);
+
+		SynSender synSender = new SynSender(muxDemux, peerTable, local, synInterval);
+		new Thread(synSender).start();
+		muxDemux.addHandler(synSender);
 
 		SynReceiver synReceiver = new SynReceiver(muxDemux, peerTable, listSender);
 		new Thread(synReceiver).start();

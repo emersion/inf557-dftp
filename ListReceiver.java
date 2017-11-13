@@ -30,8 +30,13 @@ class ListReceiver implements MessageHandler, Runnable {
 			return received == total;
 		}
 
-		public void receive(int partIndex, String row) {
-			data[partIndex] = row;
+		public void receive(int partNum, String row) {
+			if (data[partNum] != null) {
+				// Rows, once set, are immutable
+				return;
+			}
+			data[partNum] = row;
+			++received;
 		}
 
 		public String[] data() {
@@ -44,6 +49,7 @@ class ListReceiver implements MessageHandler, Runnable {
 
 	public ListReceiver(PeerTable peerTable, String local) {
 		this.peerTable = peerTable;
+		this.local = local;
 	}
 
 	public void handleMessage(Envelope env) {
@@ -78,13 +84,14 @@ class ListReceiver implements MessageHandler, Runnable {
 			PendingReception pr = pending.get(list.sender);
 			if (pr == null || pr.seqNum < list.seqNum) {
 				pr = new PendingReception(list.sender, list.seqNum, list.totalParts);
+				pending.put(list.sender, pr);
 			} else {
 				if (pr.seqNum > list.seqNum) {
-					// Received LIST message for an old SYN
+					// Received a LIST message for an old SYN
 					continue;
 				}
 				if (pr.total != list.totalParts) {
-					System.err.println("Received a LIST with total "+list.totalParts+", which is different than previous ones (expected "+pr.total+")");
+					System.err.println("Received a LIST with total "+list.totalParts+", which is different from previous ones (expected "+pr.total+")");
 					pending.remove(list.sender);
 					continue;
 				}

@@ -26,7 +26,7 @@ class PeerTableDumper implements Runnable {
 		msg += "+------------------------------------------------+\n";
 		List<PeerTable.Record> records = peerTable.records();
 		for (PeerTable.Record e : records) {
-			msg += String.format("| %1$16s | %2$13s | %3$11s |\n", e.id, e.state(), e.lastSeqNum);
+			msg += String.format("| %1$16s | %2$13s | %3$11s |\n", e.id, e.state(), e.seqNum());
 		}
 		msg += "+------------------------------------------------+\n";
 		return msg;
