@@ -42,8 +42,8 @@ class Test {
 		new Thread(debugReceiver).start();
 		muxDemux.addHandler(debugReceiver);
 
-		PeerTableDumper peerTableDumper = new PeerTableDumper(port, peerTable);
-		new Thread(peerTableDumper).start();
+		Dumper dumper = new Dumper(port, peerTable, db);
+		new Thread(dumper).start();
 
 		muxDemux.run();
 	}
