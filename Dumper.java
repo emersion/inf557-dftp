@@ -35,15 +35,15 @@ class Dumper implements Runnable {
 		private String usage() {
 			return "Usage: [Command]\n"
 							+ "Command:\n"
-							+ "\ta, all : print databse, peerTable\n"
-							+ "\tpt, peertable : display the peerTable\n"
-							+ "\tdb, database : display the databse\n"
-							+ "\th, help : display this usage usage\n";
+							+ "\ta, all         : print databse, peerTable\n"
+							+ "\tpt, peertable  : display the peerTable\n"
+							+ "\tdb, database   : display the databse\n"
+							+ "\th, help        : display this usage usage\n\n";
 		}
 
 		private String prettyPeerTable() {
-			// %[argument_index$][flags][width][.precision]conversion
-			String msg = "+------------------------------------------------+\n";
+			String msg = "# Peer Table #\n";
+			msg += "+------------------------------------------------+\n";
 			msg += String.format("| %1$16s | %2$13s | %3$11s |\n", "Id", "State", "Seq#");
 			msg += "+------------------------------------------------+\n";
 			List<PeerTable.Record> records = peerTable.records();
@@ -54,26 +54,45 @@ class Dumper implements Runnable {
 			return msg;
 		}
 
+
+		/* Tinyfied 64 chars database */
+		private String prettyDatabase() {
+			String msg = "# Database - Id : " + database.seqNum() + " #\n";
+			msg += "+------------------------------------------------------------------+\n";
+			List<String> db = database.data();
+			for (String s : db) {
+				msg += String.format("| %1$64s |\n", s);
+			}
+			msg += "+------------------------------------------------------------------+\n\n";
+			return msg;
+		}
+
 		private void handleMessage(PrintStream ps, String cmd) {
-			cmd.toLowerCase();
+			cmd = cmd.toLowerCase();
 			if (cmd.equals("all") || cmd.equals("a")) {
-				ps.print("Not yet implemented command : "+cmd+"\n");
+				ps.print(this.prettyPeerTable());
+				ps.print(prettyDatabase());
 				return;
 			}
 			if (cmd.equals("peertable") || cmd.equals("pt")) {
 				ps.print(this.prettyPeerTable());
 				return;
 			}
+			if (cmd.equals("peerdatabase") || cmd.equals("pdb")) {
+				ps.print("Not yet implemented : " + cmd + "\n");
+			}
 			if (cmd.equals("database") || cmd.equals("db")) {
-				ps.print("Not yet implemented command : "+cmd+"\n");
+				ps.print(prettyDatabase());
 				return;
 			}
 			if (cmd.equals("help") || cmd.equals("h")) {
 				ps.print(this.usage());
+				return;
 			}
 			if (cmd.equals("quit") || cmd.equals("q")) {
 				try {
 					client.close();
+					return;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
