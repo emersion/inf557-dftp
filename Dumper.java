@@ -70,12 +70,12 @@ class Dumper implements Runnable {
 		private String prettyPeerDatabase() {
 			String msg = "## Peer DataBases ##\n";
 			msg += "+-------------------------------------------------------------------------------------+\n";
-			msg += String.format("| %2$16s | %2$64s |\n", "Peer Id", "Data");
+			msg += String.format("| %1$16s | %2$64s |\n", "Peer Id", "Data");
 			msg += "+-------------------------------------------------------------------------------------+\n";
 			List<PeerTable.Record> records = peerTable.records();
 			for (PeerTable.Record e : records) {
 				if (e.database() != null) {
-					msg += String.format("| %2$16s | %2$64s |\n", e.id, e.database().data());
+					msg += String.format("| %1$16s | %2$64s |\n", e.id, e.database().data());
 				}
 			}
 			msg += "+-------------------------------------------------------------------------------------+\n\n";
