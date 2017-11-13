@@ -20,7 +20,7 @@ class PeerTable {
 		protected int pendingSeqNum = 0;
 		protected Instant expiresAt = null;
 		protected State state = State.HEARD;
-		protected Database db = new Database();
+		protected Database db = null;
 
 		protected Record(String id, InetAddress address) {
 			this.id = id;
@@ -31,6 +31,9 @@ class PeerTable {
 		 * Returns the sequence number of this peer's synchronized database.
 		 */
 		public int seqNum() {
+			if (db == null) {
+				return Integer.MIN_VALUE;
+			}
 			return db.seqNum();
 		}
 
@@ -84,7 +87,11 @@ class PeerTable {
 			throw new RuntimeException("attempt to synchronize a non-existing peer: "+id);
 		}
 
-		rec.db.update(data, seqNum);
+		if (rec.db == null) {
+			rec.db = new Database(data, seqNum);
+		} else {
+			rec.db.update(data, seqNum);
+		}
 		rec.state = State.SYNCHRONIZED;
 	}
 

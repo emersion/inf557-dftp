@@ -3,13 +3,8 @@ import java.util.Collections;
 import java.util.List;
 
 class Database {
-	private String[] data = new String[0];
-	private int seqNum = Integer.MIN_VALUE;
-
-	/**
-	 * Create an unsynchronized database.
-	 */
-	public Database() {}
+	private String[] data;
+	private int seqNum;
 
 	/**
 	 * Create a synchronized, populated database.
