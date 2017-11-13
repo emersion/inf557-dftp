@@ -15,6 +15,10 @@ class SynReceiver implements MessageHandler, Runnable {
 	}
 
 	public void handleMessage(Envelope env) {
+		if (!(env.msg instanceof Message.Syn)) {
+			return;
+		}
+
 		incoming.offer(env);
 	}
 
@@ -26,11 +30,14 @@ class SynReceiver implements MessageHandler, Runnable {
 			} catch (InterruptedException e) {
 				break;
 			}
+			Message.Syn syn = (Message.Syn)env.msg;
 
-			if (!(env.msg instanceof Message.Syn)) {
+			try {
+				peerTable.update(syn.sender, env.address, syn.seqNum);
+			} catch (Exception e) {
+				e.printStackTrace();
 				continue;
 			}
-			Message.Syn syn = (Message.Syn)env.msg;
 
 			listSender.sendTo(env.address, syn.peer);
 		}

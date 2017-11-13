@@ -11,6 +11,10 @@ class HelloReceiver implements MessageHandler, Runnable {
 	}
 
 	public void handleMessage(Envelope env) {
+		if (!(env.msg instanceof Message.Hello)) {
+			return;
+		}
+
 		incoming.offer(env);
 	}
 
@@ -23,12 +27,14 @@ class HelloReceiver implements MessageHandler, Runnable {
 				break;
 			}
 
-			if (!(env.msg instanceof Message.Hello)) {
-				continue;
-			}
 			Message.Hello hello = (Message.Hello)env.msg;
 
-			peerTable.update(hello.sender, env.address, hello.seqNum);
+			try {
+				peerTable.update(hello.sender, env.address, hello.seqNum);
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
 		}
 	}
 }
