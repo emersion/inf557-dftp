@@ -10,6 +10,11 @@ class ListReceiver implements MessageHandler, Runnable {
 	private BlockingQueue<Envelope> incoming = new ArrayBlockingQueue<>(32);
 	private Map<String, PendingReception> pending = new HashMap<>();
 
+	/**
+	 * A pending reception is an in-progress LIST message reception. It collects
+	 * all LIST messages sent by a specific peer until a complete database is
+	 * received.
+	 */
 	private static class PendingReception {
 		public final String peer;
 		public final int seqNum;
@@ -26,19 +31,32 @@ class ListReceiver implements MessageHandler, Runnable {
 			this.data = new String[total];
 		}
 
+		/**
+		 * Checks if the received database is complete.
+		 */
 		public boolean done() {
 			return received == total;
 		}
 
+		/**
+		 * Receives a part of the database.
+		 */
 		public void receive(int partNum, String row) {
 			if (data[partNum] != null) {
 				// Rows, once set, are immutable
+				if (!data[partNum].equals(row)) {
+					System.err.println("received two different values for row "+partNum+" from peer "+peer);
+				}
 				return;
 			}
 			data[partNum] = row;
 			++received;
 		}
 
+		/**
+		 * Returns the complete database contents. Can only be used once the
+		 * received database is complete.
+		 */
 		public String[] data() {
 			if (!done()) {
 				throw new RuntimeException("Attempt to retrieve a incomplete database");
@@ -81,6 +99,9 @@ class ListReceiver implements MessageHandler, Runnable {
 				continue;
 			}
 
+			// Check if there's already a pending reception for this peer
+			// The LIST sequence number may be newer than the pending reception, in
+			// this case overwrite the old pending reception
 			PendingReception pr = pending.get(list.sender);
 			if (pr == null || pr.seqNum < list.seqNum) {
 				pr = new PendingReception(list.sender, list.seqNum, list.totalParts);
@@ -91,6 +112,7 @@ class ListReceiver implements MessageHandler, Runnable {
 					continue;
 				}
 				if (pr.total != list.totalParts) {
+					// The LIST total cannot change
 					System.err.println("Received a LIST with total "+list.totalParts+", which is different from previous ones (expected "+pr.total+")");
 					pending.remove(list.sender);
 					continue;
@@ -101,13 +123,14 @@ class ListReceiver implements MessageHandler, Runnable {
 			pr.receive(list.partNum, list.data);
 
 			if (pr.done()) {
-				pending.remove(list.sender);
+				// We got a complete database, synchronize the peer
 				try {
 					peerTable.synchronize(pr.peer, pr.data(), pr.seqNum);
 				} catch (Exception e) {
 					e.printStackTrace();
 					continue;
 				}
+				pending.remove(list.sender);
 			}
 		}
 	}

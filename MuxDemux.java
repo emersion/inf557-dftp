@@ -39,9 +39,9 @@ class MuxDemux implements Runnable {
 				}
 
 				byte[] buf = env.msg.format().getBytes();
-				DatagramPacket dp = new DatagramPacket(buf, buf.length, env.address, socket.getLocalPort());
+				DatagramPacket packet = new DatagramPacket(buf, buf.length, env.address, socket.getLocalPort());
 				try {
-					socket.send(dp);
+					socket.send(packet);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

@@ -26,7 +26,6 @@ class HelloReceiver implements MessageHandler, Runnable {
 			} catch (InterruptedException e) {
 				break;
 			}
-
 			Message.Hello hello = (Message.Hello)env.msg;
 
 			try {

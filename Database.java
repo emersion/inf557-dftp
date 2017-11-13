@@ -1,16 +1,30 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 class Database {
 	private String[] data = new String[0];
 	private int seqNum = Integer.MIN_VALUE;
 
+	/**
+	 * Create an unsynchronized database.
+	 */
 	public Database() {}
 
+	/**
+	 * Create a synchronized, populated database.
+	 */
 	public Database(String[] data, int seqNum) {
 		this.data = data;
 		this.seqNum = seqNum;
 	}
 
+	/**
+	 * Update the database. A database can only be updated with strictly
+	 * increasing sequence numbers.
+	 */
 	public synchronized void update(String[] data, int seqNum) {
-		if (this.seqNum > seqNum) {
+		if (this.seqNum >= seqNum) {
 			throw new RuntimeException("attempt to update a Database with an older sequence number");
 		}
 
@@ -18,10 +32,8 @@ class Database {
 		this.seqNum = seqNum;
 	}
 
-	public synchronized String[] data() {
-		// We don't need to copy the data array because it's immutable
-		// TODO: return a read-only data structure to prevent writes
-		return data;
+	public synchronized List<String> data() {
+		return Collections.unmodifiableList(Arrays.asList(data));
 	}
 
 	public synchronized int seqNum() {
