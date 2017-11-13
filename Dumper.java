@@ -86,13 +86,13 @@ class Dumper implements Runnable {
 			cmd = cmd.toLowerCase();
 			switch(cmd) {
 				case "all": case "a":
-				ps.print(this.prettyPeerTable());
+				ps.print(prettyPeerTable());
 				ps.print(prettyPeerDatabase());
 				ps.print(prettyDatabase());
 				break;
 
 				case "peertable": case "pt":
-				ps.print(this.prettyPeerTable());
+				ps.print(prettyPeerTable());
 				break;
 
 				case "peerdatabase": case "pdb":
