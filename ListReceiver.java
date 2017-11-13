@@ -34,11 +34,11 @@ class ListReceiver implements MessageHandler, Runnable {
 			data[partIndex] = row;
 		}
 
-		public Database database() {
+		public String[] data() {
 			if (!done()) {
-				throw new RuntimeException("Attempt to build a incomplete database");
+				throw new RuntimeException("Attempt to retrieve a incomplete database");
 			}
-			return new Database(data, seqNum);
+			return data;
 		}
 	}
 
@@ -95,8 +95,12 @@ class ListReceiver implements MessageHandler, Runnable {
 
 			if (pr.done()) {
 				pending.remove(list.sender);
-				Database db = pr.database();
-				// TODO: store db
+				try {
+					peerTable.synchronize(pr.peer, pr.data(), pr.seqNum);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
 			}
 		}
 	}

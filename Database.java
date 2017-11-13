@@ -1,9 +1,10 @@
 class Database {
-	private String[] data = null;
-	private int seqNum = 0;
+	private String[] data;
+	private int seqNum;
 
 	public Database() {
 		this.data = new String[0];
+		this.seqNum = Integer.MIN_VALUE;
 	}
 
 	public Database(String[] data, int seqNum) {
@@ -11,9 +12,13 @@ class Database {
 		this.seqNum = seqNum;
 	}
 
-	public synchronized void update(String[] data) {
+	public synchronized void update(String[] data, int seqNum) {
+		if (this.seqNum > seqNum) {
+			throw new RuntimeException("attempt to update a Database with an older sequence number");
+		}
+
 		this.data = data;
-		++seqNum;
+		this.seqNum = seqNum;
 	}
 
 	public synchronized String[] data() {

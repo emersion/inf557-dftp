@@ -20,6 +20,7 @@ class PeerTable {
 		protected int lastSeqNum = 0;
 		protected Instant expiresAt = null;
 		protected State state = State.HEARD;
+		protected Database db = new Database();
 
 		protected Record(String id, InetAddress address) {
 			this.id = id;
@@ -63,6 +64,16 @@ class PeerTable {
 		rec.expiresAt = Instant.now().plus(expiration);
 
 		cleanup();
+	}
+
+	public synchronized void synchronize(String id, String[] data, int seqNum) {
+		Record rec = records.get(id);
+		if (rec == null) {
+			throw new RuntimeException("attempt to synchronize a non-existing peer: "+id);
+		}
+
+		rec.db.update(data, seqNum);
+		rec.lastSeqNum = seqNum;
 	}
 
 	private synchronized void cleanup() {
