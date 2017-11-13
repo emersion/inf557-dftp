@@ -47,6 +47,10 @@ class PeerTable {
 		public State state() {
 			return state;
 		}
+
+		public Database database() {
+			return db;
+		}
 	}
 
 	private Map<String, Record> records = new HashMap<>();
