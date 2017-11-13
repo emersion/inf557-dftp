@@ -139,12 +139,20 @@ class Dumper implements Runnable {
 				try {
 					ps.print(">");
 					String cmd = br.readLine();
+					if (cmd == null){
+						break;
+					}
 					handleMessage(ps, cmd);
 					ps.flush();
 				} catch (IOException e){
 					e.printStackTrace();
 					break;
 				}
+			}
+			try {
+				client.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
