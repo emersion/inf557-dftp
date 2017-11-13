@@ -25,7 +25,7 @@ class Dumper implements Runnable {
 		}
 	}
 
-	class ClientHandler implements Runnable {
+	private class ClientHandler implements Runnable {
 		private Socket client;
 
 		ClientHandler(Socket client) {
@@ -34,11 +34,12 @@ class Dumper implements Runnable {
 
 		private String usage() {
 			return "Usage: [Command]\n"
-							+ "Command:\n"
-							+ "\ta, all         : print databse, peerTable\n"
-							+ "\tpt, peertable  : display the peerTable\n"
-							+ "\tdb, database   : display the databse\n"
-							+ "\th, help        : display this usage usage\n\n";
+				+ "Command:\n"
+				+ "\ta, All            : print databse, peerTable\n"
+				+ "\tpt, PeerTable     : display the peerTable\n"
+				+ "\tpdb, PeerDatabse  : display the peerTable\n"
+				+ "\tdb, Database      : display the databse\n"
+				+ "\th, Help           : display this usage usage\n\n";
 		}
 
 		private String prettyPeerTable() {
@@ -54,50 +55,70 @@ class Dumper implements Runnable {
 			return msg;
 		}
 
-
-		/* Tinyfied 64 chars database */
+		/* Tinyfied 83 chars database (83 is about half a screen size) */
 		private String prettyDatabase() {
 			String msg = "# Database - Id : " + database.seqNum() + " #\n";
-			msg += "+------------------------------------------------------------------+\n";
+			msg += "+-------------------------------------------------------------------------------------+\n";
 			List<String> db = database.data();
 			for (String s : db) {
-				msg += String.format("| %1$64s |\n", s);
+				msg += String.format("| %1$83s |\n", s);
 			}
-			msg += "+------------------------------------------------------------------+\n\n";
+			msg += "+-------------------------------------------------------------------------------------+\n\n";
+			return msg;
+		}
+
+		private String prettyPeerDatabase() {
+			String msg = "## Peer DataBases ##\n";
+			msg += "+-------------------------------------------------------------------------------------+\n";
+			msg += String.format("| %2$16s | %2$64s |\n", "Peer Id", "Data");
+			msg += "+-------------------------------------------------------------------------------------+\n";
+			List<PeerTable.Record> records = peerTable.records();
+			for (PeerTable.Record e : records) {
+				if (e.database() != null) {
+					msg += String.format("| %2$16s | %2$64s |\n", e.id, e.database().data());
+				}
+			}
+			msg += "+-------------------------------------------------------------------------------------+\n\n";
 			return msg;
 		}
 
 		private void handleMessage(PrintStream ps, String cmd) {
 			cmd = cmd.toLowerCase();
-			if (cmd.equals("all") || cmd.equals("a")) {
+			switch(cmd) {
+				case "all": case "a":
 				ps.print(this.prettyPeerTable());
+				ps.print(prettyPeerDatabase());
 				ps.print(prettyDatabase());
-				return;
-			}
-			if (cmd.equals("peertable") || cmd.equals("pt")) {
+				break;
+
+				case "peertable": case "pt":
 				ps.print(this.prettyPeerTable());
-				return;
-			}
-			if (cmd.equals("peerdatabase") || cmd.equals("pdb")) {
-				ps.print("Not yet implemented : " + cmd + "\n");
-			}
-			if (cmd.equals("database") || cmd.equals("db")) {
+				break;
+
+				case "peerdatabase": case "pdb":
+				ps.print(prettyPeerDatabase());
+				break;
+
+				case "database": case "db":
 				ps.print(prettyDatabase());
-				return;
-			}
-			if (cmd.equals("help") || cmd.equals("h")) {
-				ps.print(this.usage());
-				return;
-			}
-			if (cmd.equals("quit") || cmd.equals("q")) {
+				break;
+
+				case "help": case "h":
+				ps.print(usage());
+				break;
+
+				case "quit": case "q":
 				try {
 					client.close();
-					return;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				break;
+
+				default:
+				ps.print("Unknown command : "+cmd+"\n");
+				break;
 			}
-			ps.print("Unknown command : "+cmd+"\n");
 		}
 
 		public void run() {
@@ -116,11 +137,13 @@ class Dumper implements Runnable {
 
 			while (true) {
 				try {
+					ps.print(">");
 					String cmd = br.readLine();
 					handleMessage(ps, cmd);
 					ps.flush();
 				} catch (IOException e){
-					return;
+					e.printStackTrace();
+					break;
 				}
 			}
 		}
