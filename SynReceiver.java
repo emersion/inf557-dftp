@@ -32,7 +32,7 @@ class SynReceiver implements MessageHandler, Runnable {
 			}
 			Message.Syn syn = (Message.Syn)env.msg;
 
-			listSender.sendTo(env.address, msg.peer);
+			listSender.sendTo(env.address, syn.peer);
 		}
 	}
 }

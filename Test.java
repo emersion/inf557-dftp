@@ -26,11 +26,11 @@ class Test {
 		new Thread(synSender).start();
 		muxDemux.addHandler(synSender);
 
-		ListSender listSender = new ListSender(muxDemux, peerTable, local);
+		ListSender listSender = new ListSender(muxDemux, peerTable, db, local);
 		new Thread(listSender).start();
 		muxDemux.addHandler(listSender);
 
-		SynReceiver synReceiver = new SynReceiver(muxDemux, peerTable, local, listSender);
+		SynReceiver synReceiver = new SynReceiver(muxDemux, peerTable, listSender);
 		new Thread(synReceiver).start();
 		muxDemux.addHandler(synReceiver);
 

@@ -1,12 +1,14 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.Map;
+import java.util.HashMap;
 
 class ListReceiver implements MessageHandler, Runnable {
 	private PeerTable peerTable;
 	private String local;
 
 	private BlockingQueue<Envelope> incoming = new ArrayBlockingQueue<>(32);
-	private Map<String, PendingList> pending = new HashMap<>();
+	private Map<String, PendingReception> pending = new HashMap<>();
 
 	private static class PendingReception {
 		public final String peer;
@@ -40,7 +42,7 @@ class ListReceiver implements MessageHandler, Runnable {
 		}
 	}
 
-	public HelloReceiver(PeerTable peerTable, String local) {
+	public ListReceiver(PeerTable peerTable, String local) {
 		this.peerTable = peerTable;
 	}
 
@@ -75,22 +77,21 @@ class ListReceiver implements MessageHandler, Runnable {
 
 			PendingReception pr = pending.get(list.sender);
 			if (pr == null || pr.seqNum < list.seqNum) {
-				pr = new PendingReception(list.sender, list.seqNum, list.total);
+				pr = new PendingReception(list.sender, list.seqNum, list.totalParts);
 			} else {
 				if (pr.seqNum > list.seqNum) {
 					// Received LIST message for an old SYN
 					continue;
 				}
-				if (pr.total != list.total) {
-					System.err.println("Received a LIST with total "+list.total+", which is different than previous ones (expected "+pr.total+")");
+				if (pr.total != list.totalParts) {
+					System.err.println("Received a LIST with total "+list.totalParts+", which is different than previous ones (expected "+pr.total+")");
 					pending.remove(list.sender);
 					continue;
 				}
 			}
 
-			// partIndex is already checked by Message.List
-
-			pr.receive(list.partIndex, list.data);
+			// partNum is already checked by Message.List
+			pr.receive(list.partNum, list.data);
 
 			if (pr.done()) {
 				pending.remove(list.sender);

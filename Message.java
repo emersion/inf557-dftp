@@ -280,5 +280,3 @@ abstract class Message {
 	}
 
 }
-
-
