@@ -17,17 +17,28 @@ class PeerTable {
 		public final String id;
 		public final InetAddress address;
 
-		protected int lastSeqNum = 0;
+		protected int pendingSeqNum = 0;
 		protected Instant expiresAt = null;
 		protected State state = State.HEARD;
+		protected Database db = new Database();
 
 		protected Record(String id, InetAddress address) {
 			this.id = id;
 			this.address = address;
 		}
 
-		public int lastSeqNum() {
-			return lastSeqNum;
+		/**
+		 * Returns the sequence number of this peer's synchronized database.
+		 */
+		public int seqNum() {
+			return db.seqNum();
+		}
+
+		/**
+		 * Returns the last received (maybe not yet synchronized) sequence number.
+		 */
+		public int pendingSeqNum() {
+			return pendingSeqNum;
 		}
 
 		public State state() {
@@ -55,14 +66,26 @@ class PeerTable {
 			if (!address.equals(rec.address)) {
 				throw new IllegalArgumentException("got two different IP addresses for the same peer ID");
 			}
-			if (rec.lastSeqNum != seqNum) {
-				rec.state = State.INCONSISTENT;
-			}
 		}
 
 		rec.expiresAt = Instant.now().plus(expiration);
+		rec.pendingSeqNum = seqNum;
+
+		if (rec.seqNum() != seqNum) {
+			rec.state = State.INCONSISTENT;
+		}
 
 		cleanup();
+	}
+
+	public synchronized void synchronize(String id, String[] data, int seqNum) {
+		Record rec = records.get(id);
+		if (rec == null) {
+			throw new RuntimeException("attempt to synchronize a non-existing peer: "+id);
+		}
+
+		rec.db.update(data, seqNum);
+		rec.state = State.SYNCHRONIZED;
 	}
 
 	private synchronized void cleanup() {

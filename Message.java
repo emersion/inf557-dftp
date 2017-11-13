@@ -136,7 +136,7 @@ abstract class Message {
 		}
 
 		public Syn(String[] parts) {
-			if (parts.length < 5) {
+			if (parts.length < 4) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
 
@@ -159,7 +159,6 @@ abstract class Message {
 			} catch (NumberFormatException e) {
 				throw new IllegalArgumentException("invalid sequence number: "+e.getMessage());
 			}
-
 		}
 
 		@Override
@@ -212,7 +211,7 @@ abstract class Message {
 		}
 
 		public List(String[] parts) {
-			if (parts.length != 8) {
+			if (parts.length < 7) {
 				throw new IllegalArgumentException("wrong number of fields");
 			}
 			if (!LIST.equals(parts[0])) {
@@ -278,7 +277,4 @@ abstract class Message {
 					" data="+this.data+"}";
 		}
 	}
-
 }
-
-

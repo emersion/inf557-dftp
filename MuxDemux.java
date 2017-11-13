@@ -15,7 +15,7 @@ class MuxDemux implements Runnable {
 
 	private DatagramSocket socket;
 	private final InetAddress brd;
-	private BlockingQueue<String> outgoing = new ArrayBlockingQueue<>(32);
+	private BlockingQueue<Envelope> outgoing = new ArrayBlockingQueue<>(32);
 	private List<MessageHandler> handlers = new ArrayList<>();
 
 	public MuxDemux(DatagramSocket socket) throws SocketException, UnknownHostException {
@@ -31,17 +31,17 @@ class MuxDemux implements Runnable {
 	private class SenderWorker implements Runnable {
 		public void run() {
 			while (true) {
-				String msg;
+				Envelope env;
 				try {
-					msg = outgoing.take();
+					env = outgoing.take();
 				} catch (InterruptedException e) {
 					break;
 				}
 
-				byte[] buf = msg.getBytes();
-				DatagramPacket dp = new DatagramPacket(buf, buf.length, brd, socket.getLocalPort());
+				byte[] buf = env.msg.format().getBytes();
+				DatagramPacket packet = new DatagramPacket(buf, buf.length, env.address, socket.getLocalPort());
 				try {
-					socket.send(dp);
+					socket.send(packet);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -89,6 +89,10 @@ class MuxDemux implements Runnable {
 	}
 
 	public void broadcast(Message msg) {
-		outgoing.add(msg.format());
+		outgoing.add(new Envelope(brd, msg));
+	}
+
+	public void send(Envelope env) {
+		outgoing.add(env);
 	}
 }

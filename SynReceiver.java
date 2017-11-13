@@ -1,17 +1,21 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-class HelloReceiver implements MessageHandler, Runnable {
+class SynReceiver implements MessageHandler, Runnable {
+	private MuxDemux muxDemux;
 	private PeerTable peerTable;
+	private ListSender listSender;
 
 	private BlockingQueue<Envelope> incoming = new ArrayBlockingQueue<>(32);
 
-	public HelloReceiver(PeerTable peerTable) {
+	public SynReceiver(MuxDemux muxDemux, PeerTable peerTable, ListSender listSender) {
+		this.muxDemux = muxDemux;
 		this.peerTable = peerTable;
+		this.listSender = listSender;
 	}
 
 	public void handleMessage(Envelope env) {
-		if (!(env.msg instanceof Message.Hello)) {
+		if (!(env.msg instanceof Message.Syn)) {
 			return;
 		}
 
@@ -26,14 +30,16 @@ class HelloReceiver implements MessageHandler, Runnable {
 			} catch (InterruptedException e) {
 				break;
 			}
-			Message.Hello hello = (Message.Hello)env.msg;
+			Message.Syn syn = (Message.Syn)env.msg;
 
 			try {
-				peerTable.update(hello.sender, env.address, hello.seqNum);
+				peerTable.update(syn.sender, env.address, syn.seqNum);
 			} catch (Exception e) {
 				e.printStackTrace();
 				continue;
 			}
+
+			listSender.sendTo(env.address, syn.peer);
 		}
 	}
 }
