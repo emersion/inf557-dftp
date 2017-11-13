@@ -149,6 +149,11 @@ class Dumper implements Runnable {
 					break;
 				}
 			}
+			try {
+				client.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
