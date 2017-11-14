@@ -5,7 +5,7 @@ all: $(patsubst %.java, %.class, $(wildcard *.java))
 
 .PHONY: clean
 clean:
-	rm -f *.class
+	rm -f *.class *.tar.gz
 
 .PHONY: release
 release:
