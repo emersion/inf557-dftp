@@ -8,6 +8,7 @@ class Test {
 
 	public static void main(String[] args) throws Exception {
 		String local = InetAddress.getLocalHost().getHostName();
+		local = local.replaceAll("[^a-zA-Z0-9]", "");
 
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
