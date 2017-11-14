@@ -151,6 +151,9 @@ class Dumper implements Runnable {
 						break;
 					}
 					handleMessage(ps, cmd);
+					if (client.isClosed()) {
+						break;
+					}
 					ps.flush();
 				} catch (IOException e) {
 					e.printStackTrace();
