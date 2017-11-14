@@ -20,7 +20,7 @@ class Dumper implements Runnable {
 			this.servSocket = new ServerSocket(port, BACKLOG_SIZE);
 			this.peerTable = pt;
 			this.database = db;
-		} catch (IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -28,24 +28,24 @@ class Dumper implements Runnable {
 	private class ClientHandler implements Runnable {
 		private Socket client;
 
-		ClientHandler(Socket client) {
+		public ClientHandler(Socket client) {
 			this.client = client;
 		}
 
 		private String usage() {
-			return "Usage: [Command]\n"
-				+ "Command:\n"
-				+ "\ta, All            : print databse, peerTable\n"
-				+ "\tpt, PeerTable     : display the peerTable\n"
-				+ "\tpdb, PeerDatabse  : display the peerTable\n"
-				+ "\tdb, Database      : display the databse\n"
-				+ "\th, Help           : display this usage usage\n\n";
+			return "Usage: <command>\n"
+				+ "Commands:\n"
+				+ "\ta, all             print databse, peerTable\n"
+				+ "\tpt, peertable      display the peerTable\n"
+				+ "\tpdb, peerdatabase  display the peerTable\n"
+				+ "\tdb, database       display the databse\n"
+				+ "\th, help            display this usage usage\n\n";
 		}
 
 		private String prettyPeerTable() {
-			String msg = "# Peer Table #\n";
+			String msg = "Peer Table\n";
 			msg += "+------------------------------------------------+\n";
-			msg += String.format("| %1$16s | %2$13s | %3$11s |\n", "Id", "State", "Seq#");
+			msg += String.format("| %1$16s | %2$13s | %3$11s |\n", "ID", "State", "Seq#");
 			msg += "+------------------------------------------------+\n";
 			List<PeerTable.Record> records = peerTable.records();
 			for (PeerTable.Record e : records) {
@@ -57,7 +57,7 @@ class Dumper implements Runnable {
 
 		/* Tinyfied 83 chars database (83 is about half a screen size) */
 		private String prettyDatabase() {
-			String msg = "# Database - Id : " + database.seqNum() + " #\n";
+			String msg = "Database - ID: " + database.seqNum() + "\n";
 			msg += "+-------------------------------------------------------------------------------------+\n";
 			List<String> db = database.data();
 			for (String s : db) {
@@ -68,14 +68,15 @@ class Dumper implements Runnable {
 		}
 
 		private String prettyPeerDatabase() {
-			String msg = "## Peer DataBases ##\n";
+			String msg = "Peer Databases\n";
 			msg += "+-------------------------------------------------------------------------------------+\n";
-			msg += String.format("| %1$16s | %2$64s |\n", "Peer Id", "Data");
+			msg += String.format("| %1$16s | %2$64s |\n", "Peer ID", "Data");
 			msg += "+-------------------------------------------------------------------------------------+\n";
 			List<PeerTable.Record> records = peerTable.records();
 			for (PeerTable.Record e : records) {
-				if (e.database() != null) {
-					msg += String.format("| %1$16s | %2$64s |\n", e.id, e.database().data());
+				Database db = e.database();
+				if (db != null) {
+					msg += String.format("| %1$16s | %2$64s |\n", e.id, db.data());
 				}
 			}
 			msg += "+-------------------------------------------------------------------------------------+\n\n";
@@ -85,29 +86,35 @@ class Dumper implements Runnable {
 		private void handleMessage(PrintStream ps, String cmd) {
 			cmd = cmd.toLowerCase();
 			switch(cmd) {
-				case "all": case "a":
+			case "all":
+			case "a":
 				ps.print(prettyPeerTable());
 				ps.print(prettyPeerDatabase());
 				ps.print(prettyDatabase());
 				break;
 
-				case "peertable": case "pt":
+			case "peertable":
+			case "pt":
 				ps.print(prettyPeerTable());
 				break;
 
-				case "peerdatabase": case "pdb":
+			case "peerdatabase":
+			case "pdb":
 				ps.print(prettyPeerDatabase());
 				break;
 
-				case "database": case "db":
+			case "database":
+			case "db":
 				ps.print(prettyDatabase());
 				break;
 
-				case "help": case "h":
+			case "help":
+			case "h":
 				ps.print(usage());
 				break;
 
-				case "quit": case "q":
+			case "quit":
+			case "q":
 				try {
 					client.close();
 				} catch (IOException e) {
@@ -115,7 +122,7 @@ class Dumper implements Runnable {
 				}
 				break;
 
-				default:
+			default:
 				ps.print("Unknown command : "+cmd+"\n");
 				break;
 			}
@@ -137,18 +144,20 @@ class Dumper implements Runnable {
 
 			while (true) {
 				try {
-					ps.print(">");
+					ps.print("> ");
+					ps.flush();
 					String cmd = br.readLine();
-					if (cmd == null){
+					if (cmd == null) {
 						break;
 					}
 					handleMessage(ps, cmd);
 					ps.flush();
-				} catch (IOException e){
+				} catch (IOException e) {
 					e.printStackTrace();
 					break;
 				}
 			}
+
 			try {
 				client.close();
 			} catch (IOException e) {
