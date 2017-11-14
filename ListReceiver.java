@@ -99,6 +99,12 @@ class ListReceiver implements MessageHandler, Runnable {
 				continue;
 			}
 
+			PeerTable.Record rec = peerTable.get(list.sender);
+			if (rec.state == PeerTable.State.SYNCHRONIZED) {
+				// Already synchronized, we don't need this LIST message
+				continue;
+			}
+
 			// Check if there's already a pending reception for this peer
 			// The LIST sequence number may be newer than the pending reception, in
 			// this case overwrite the old pending reception
