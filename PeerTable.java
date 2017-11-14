@@ -30,7 +30,7 @@ class PeerTable {
 		/**
 		 * Returns the sequence number of this peer's synchronized database.
 		 */
-		public int seqNum() {
+		public synchronized int seqNum() {
 			if (db == null) {
 				return Integer.MIN_VALUE;
 			}
@@ -40,15 +40,15 @@ class PeerTable {
 		/**
 		 * Returns the last received (maybe not yet synchronized) sequence number.
 		 */
-		public int pendingSeqNum() {
+		public synchronized int pendingSeqNum() {
 			return pendingSeqNum;
 		}
 
-		public State state() {
+		public synchronized State state() {
 			return state;
 		}
 
-		public Database database() {
+		public synchronized Database database() {
 			return db;
 		}
 	}
@@ -61,7 +61,11 @@ class PeerTable {
 		for (Record rec : records.values()) {
 			list.add(rec);
 		}
-		return list;
+		return Collections.unmodifiableList(list);
+	}
+
+	public synchronized Record get(String id) {
+		return records.get(id);
 	}
 
 	public synchronized void update(String id, InetAddress address, int seqNum) {
@@ -75,11 +79,13 @@ class PeerTable {
 			}
 		}
 
-		rec.expiresAt = Instant.now().plus(expiration);
-		rec.pendingSeqNum = seqNum;
+		synchronized (rec) {
+			rec.expiresAt = Instant.now().plus(expiration);
+			rec.pendingSeqNum = seqNum;
 
-		if (rec.seqNum() != seqNum) {
-			rec.state = State.INCONSISTENT;
+			if (rec.seqNum() < seqNum) {
+				rec.state = State.INCONSISTENT;
+			}
 		}
 
 		cleanup();
@@ -91,12 +97,14 @@ class PeerTable {
 			throw new RuntimeException("attempt to synchronize a non-existing peer: "+id);
 		}
 
-		if (rec.db == null) {
-			rec.db = new Database(data, seqNum);
-		} else {
-			rec.db.update(data, seqNum);
+		synchronized (rec) {
+			if (rec.db == null) {
+				rec.db = new Database(data, seqNum);
+			} else {
+				rec.db.update(data, seqNum);
+			}
+			rec.state = State.SYNCHRONIZED;
 		}
-		rec.state = State.SYNCHRONIZED;
 	}
 
 	private synchronized void cleanup() {
