@@ -39,7 +39,7 @@ class SynReceiver implements MessageHandler, Runnable {
 				continue;
 			}
 
-			listSender.sendTo(env.address, syn.peer);
+			listSender.sendTo(env.address, syn.sender);
 		}
 	}
 }

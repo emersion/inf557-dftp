@@ -37,8 +37,8 @@ class ListSender implements MessageHandler, Runnable {
 	 */
 	public synchronized void sendTo(InetAddress address, String id) {
 		// check if already queued
-		for (Request rq : outgoing){
-			if (address.equals(rq.address) && id.equals(rq.id)) {
+		for (Request req : outgoing){
+			if (address.equals(req.address) && id.equals(req.id)) {
 				return;
 			}
 		}
