@@ -35,11 +35,12 @@ class Dumper implements Runnable {
 		private String usage() {
 			return "Usage: <command>\n"
 				+ "Commands:\n"
-				+ "\ta, all             print databse, peerTable\n"
-				+ "\tpt, peertable      display the peerTable\n"
-				+ "\tpdb, peerdatabase  display the peerTable\n"
-				+ "\tdb, database       display the databse\n"
-				+ "\th, help            display this usage usage\n\n";
+				+ "\ta, all                     print databse, peerTable\n"
+				+ "\tpt, peertable              display the peerTable\n"
+				+ "\tpadb, peeralldatabase      display the peerTable\n"
+				+ "\tpdb, peerdatabase <peerId> display the peerTable\n"
+				+ "\tdb, database               display the databse\n"
+				+ "\th, help                    display this usage usage\n\n";
 		}
 
 		private String prettyPeerTable() {
@@ -56,8 +57,12 @@ class Dumper implements Runnable {
 		}
 
 		/* Tinyfied 83 chars database (83 is about half a screen size) */
-		private String prettyDatabase() {
-			String msg = "Database - ID: " + database.seqNum() + "\n";
+		private String prettyDatabase(Database database) {
+			String msg = "Database - Sequence Number: " + database.seqNum() + "\n";
+			if (database == null) {
+				msg = "Database not present\n";
+				return msg;
+			}
 			msg += "+-------------------------------------------------------------------------------------+\n";
 			List<String> db = database.data();
 			for (String s : db) {
@@ -67,7 +72,7 @@ class Dumper implements Runnable {
 			return msg;
 		}
 
-		private String prettyPeerDatabase() {
+		private String prettyAllPeerDatabase() {
 			String msg = "Peer Databases\n";
 			msg += "+-------------------------------------------------------------------------------------+\n";
 			msg += String.format("| %1$16s | %2$64s |\n", "Peer ID", "Data");
@@ -76,21 +81,36 @@ class Dumper implements Runnable {
 			for (PeerTable.Record e : records) {
 				Database db = e.database();
 				if (db != null) {
-					msg += String.format("| %1$16s | %2$64s |\n", e.id, db.data());
+					String data = db.data().toString();
+					if (data.length() > 64) {
+						data = data.substring(0,60);
+						data += "...]";
+					}
+					msg += String.format("| %1$16s | %2$64s |\n", e.id, data);
 				}
 			}
 			msg += "+-------------------------------------------------------------------------------------+\n\n";
 			return msg;
 		}
 
+		private String prettyPeerDatabase(String peerId) {
+			String msg = "";
+			PeerTable.Record peer = peerTable.get(peerId);
+			if (peer == null) {
+				msg = "No such peerId\n";
+			} else {
+				msg = prettyDatabase(peer.database());
+			}
+			return msg;
+		}
+
 		private void handleMessage(PrintStream ps, String cmd) {
-			cmd = cmd.toLowerCase();
-			switch(cmd) {
+			String[] cmdList = cmd.split(" ");
+			switch(cmdList[0].toLowerCase()) {
 			case "all":
 			case "a":
 				ps.print(prettyPeerTable());
-				ps.print(prettyPeerDatabase());
-				ps.print(prettyDatabase());
+				ps.print(prettyAllPeerDatabase());
 				break;
 
 			case "peertable":
@@ -98,14 +118,23 @@ class Dumper implements Runnable {
 				ps.print(prettyPeerTable());
 				break;
 
+			case "peeralldatabase":
+			case "padb":
+				ps.print(prettyAllPeerDatabase());
+				break;
+
 			case "peerdatabase":
 			case "pdb":
-				ps.print(prettyPeerDatabase());
+				if (cmdList.length > 1) {
+					ps.print(prettyPeerDatabase(cmdList[1]));
+				} else {
+					ps.print("Wrong number of argument. pdb usage: pdb <peerId>\n");
+				}
 				break;
 
 			case "database":
 			case "db":
-				ps.print(prettyDatabase());
+				ps.print(prettyDatabase(database));
 				break;
 
 			case "help":
