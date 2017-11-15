@@ -28,6 +28,8 @@ class Dumper implements Runnable {
 	private class ClientHandler implements Runnable {
 		private Socket client;
 
+		private String lastCmd = null;
+
 		public ClientHandler(Socket client) {
 			this.client = client;
 		}
@@ -151,9 +153,19 @@ class Dumper implements Runnable {
 				}
 				break;
 
+			case "":
+				if (lastCmd != null) {
+					handleMessage(ps, lastCmd);
+				}
+				break;
+
 			default:
 				ps.print("Unknown command : "+cmd+"\n");
 				break;
+			}
+
+			if (!cmd.isEmpty()) {
+				lastCmd = cmd;
 			}
 		}
 
