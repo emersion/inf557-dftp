@@ -20,7 +20,7 @@ class Database {
 	 */
 	public synchronized void update(String[] data, int seqNum) {
 		if (this.seqNum >= seqNum) {
-			throw new RuntimeException("attempt to update a Database with an older sequence number");
+			throw new RuntimeException("attempt to update a Database with an older sequence number ("+seqNum+" < "+this.seqNum+")");
 		}
 
 		this.data = data;

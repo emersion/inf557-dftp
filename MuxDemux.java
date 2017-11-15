@@ -89,7 +89,7 @@ class MuxDemux implements Runnable {
 	}
 
 	public void broadcast(Message msg) {
-		outgoing.add(new Envelope(brd, msg));
+		outgoing.offer(new Envelope(brd, msg));
 	}
 
 	public void send(Envelope env) {
