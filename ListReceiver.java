@@ -100,8 +100,12 @@ class ListReceiver implements MessageHandler, Runnable {
 			}
 
 			PeerTable.Record rec = peerTable.get(list.sender);
-			if (rec.state == PeerTable.State.SYNCHRONIZED) {
+			if (rec.state() == PeerTable.State.SYNCHRONIZED) {
 				// Already synchronized, we don't need this LIST message
+				continue;
+			}
+			if (list.seqNum < rec.pendingSeqNum()) {
+				// We need a newer version of the peer database
 				continue;
 			}
 
@@ -133,6 +137,7 @@ class ListReceiver implements MessageHandler, Runnable {
 				try {
 					peerTable.synchronize(pr.peer, pr.data(), pr.seqNum);
 				} catch (Exception e) {
+					System.out.println("Cannot synchronize peer "+pr.peer);
 					e.printStackTrace();
 					continue;
 				}

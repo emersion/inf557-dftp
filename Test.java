@@ -44,7 +44,7 @@ class Test {
 		new Thread(synSender).start();
 		muxDemux.addHandler(synSender);
 
-		SynReceiver synReceiver = new SynReceiver(muxDemux, peerTable, listSender);
+		SynReceiver synReceiver = new SynReceiver(muxDemux, peerTable, listSender, local);
 		new Thread(synReceiver).start();
 		muxDemux.addHandler(synReceiver);
 

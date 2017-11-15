@@ -5,13 +5,15 @@ class SynReceiver implements MessageHandler, Runnable {
 	private MuxDemux muxDemux;
 	private PeerTable peerTable;
 	private ListSender listSender;
+	private String local;
 
 	private BlockingQueue<Envelope> incoming = new ArrayBlockingQueue<>(32);
 
-	public SynReceiver(MuxDemux muxDemux, PeerTable peerTable, ListSender listSender) {
+	public SynReceiver(MuxDemux muxDemux, PeerTable peerTable, ListSender listSender, String local) {
 		this.muxDemux = muxDemux;
 		this.peerTable = peerTable;
 		this.listSender = listSender;
+		this.local = local;
 	}
 
 	public void handleMessage(Envelope env) {
@@ -31,6 +33,10 @@ class SynReceiver implements MessageHandler, Runnable {
 				break;
 			}
 			Message.Syn syn = (Message.Syn)env.msg;
+
+			if (!local.equals(syn.peer)) {
+				continue; // Not for me
+			}
 
 			try {
 				peerTable.update(syn.sender, env.address, syn.seqNum);
