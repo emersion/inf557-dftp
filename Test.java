@@ -1,14 +1,23 @@
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 class Test {
 	private static final int port = 4242;
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
 
-	public static void main(String[] args) throws Exception {
+	private static String local() throws UnknownHostException {
 		String local = InetAddress.getLocalHost().getHostName();
 		local = local.replaceAll("[^a-zA-Z0-9]", "");
+		if (local.length() > 16) {
+			local = local.substring(0, 16);
+		}
+		return local;
+	}
+
+	public static void main(String[] args) throws Exception {
+		String local = local();
 
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
