@@ -44,7 +44,8 @@ class Dumper implements Runnable {
 				+ "\tdb, database                   display the databse\n"
 				+ "\tudb, updateDatabase [e1,...]   update the databse\n"
 				+ "\tadb, addDatabase <element>     add the databse\n"
-				+ "\trdb, resetDatabase 				    empty the databse\n"
+				+ "\trdb, resetDatabase             empty the databse\n"
+				+ "\tq, quit                        quit this console\n"
 				+ "\th, help                        display this usage usage\n\n";
 		}
 
