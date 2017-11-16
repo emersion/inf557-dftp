@@ -37,12 +37,12 @@ class Dumper implements Runnable {
 		private String usage() {
 			return "Usage: <command>\n"
 				+ "Commands:\n"
-				+ "\ta, all                         print databse, peerTable\n"
+				+ "\ta, all                         print database, peerTable\n"
 				+ "\tpt, peertable                  display the peerTable\n"
 				+ "\tpadb, peerAllDatabase          display the peer databases\n"
 				+ "\tpdb, peerDatabase <peerId>     display the peerId database\n"
-				+ "\tdb, database                   display the databse\n"
-				+ "\tudb, updateDatabase [e1,...]   update the databse\n"
+				+ "\tdb, database                   display the database\n"
+				+ "\tudb, updateDatabase [e1,...]   update the database\n"
 				+ "\tq, quit                        quit this console\n"
 				+ "\th, help                        display this usage usage\n\n";
 		}
