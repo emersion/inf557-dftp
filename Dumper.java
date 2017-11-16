@@ -44,7 +44,7 @@ class Dumper implements Runnable {
 				+ "\tdb, database                   display the database\n"
 				+ "\tudb, updateDatabase [e1,...]   update the database\n"
 				+ "\tq, quit                        quit this console\n"
-				+ "\th, help                        display this usage usage\n\n";
+				+ "\th, help                        display this usage\n\n";
 		}
 
 		private String prettyPeerTable() {
