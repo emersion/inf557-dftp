@@ -108,10 +108,6 @@ class Dumper implements Runnable {
 			return msg;
 		}
 
-		private void addDatabase(String el) {
-
-		}
-
 		private void updateDatabase(String[] data) {
 			database.update(data);
 		}
