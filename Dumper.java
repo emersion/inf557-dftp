@@ -43,8 +43,6 @@ class Dumper implements Runnable {
 				+ "\tpdb, peerDatabase <peerId>     display the peerId database\n"
 				+ "\tdb, database                   display the databse\n"
 				+ "\tudb, updateDatabase [e1,...]   update the databse\n"
-				+ "\tadb, addDatabase <element>     add the databse\n"
-				+ "\trdb, resetDatabase             empty the databse\n"
 				+ "\tq, quit                        quit this console\n"
 				+ "\th, help                        display this usage usage\n\n";
 		}
@@ -110,8 +108,16 @@ class Dumper implements Runnable {
 			return msg;
 		}
 
+		private void addDatabase(String el) {
+
+		}
+
+		private void updateDatabase(String[] data) {
+			database.update(data);
+		}
+
 		private void handleMessage(PrintStream ps, String cmd) {
-			String[] cmdList = cmd.split(" ");
+			String[] cmdList = cmd.split(" ", 2);
 			switch(cmdList[0].toLowerCase()) {
 			case "all":
 			case "a":
@@ -141,6 +147,16 @@ class Dumper implements Runnable {
 			case "database":
 			case "db":
 				ps.print(prettyDatabase(database));
+				break;
+
+			case "updatedatabase":
+			case "udb":
+				if (cmdList.length > 1) {
+					String[] dbList = cmdList[1].split(",");
+					updateDatabase(dbList);
+				} else {
+					ps.print("No list to update, udb usage: udb [e1,...]");
+				}
 				break;
 
 			case "help":

@@ -27,6 +27,11 @@ class Database {
 		this.seqNum = seqNum;
 	}
 
+	public synchronized void update(String[] data) {
+		this.data = data;
+		this.seqNum++;
+	}
+
 	public synchronized List<String> data() {
 		return Collections.unmodifiableList(Arrays.asList(data));
 	}
