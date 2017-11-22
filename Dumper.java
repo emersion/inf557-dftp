@@ -10,19 +10,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 class Dumper implements Runnable {
+	private static final int BACKLOG_SIZE = 3;
+
 	private ServerSocket servSocket;
 	private PeerTable peerTable;
 	private Database database;
-	private static final int BACKLOG_SIZE = 3;
+	private FileDownloader fileDownloader;
 
-	public Dumper(int port, PeerTable pt, Database db) {
-		try {
-			this.servSocket = new ServerSocket(port, BACKLOG_SIZE);
-			this.peerTable = pt;
-			this.database = db;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public Dumper(int port, PeerTable pt, Database db, FileDownloader fileDownloader) throws IOException {
+		this.servSocket = new ServerSocket(port, BACKLOG_SIZE);
+		this.peerTable = pt;
+		this.database = db;
+		this.fileDownloader = fileDownloader;
 	}
 
 	private class ClientHandler implements Runnable {
@@ -40,9 +39,10 @@ class Dumper implements Runnable {
 				+ "\ta, all                     print databse, peerTable\n"
 				+ "\tpt, peertable              display the peerTable\n"
 				+ "\tpadb, peeralldatabase      display the peerTable\n"
-				+ "\tpdb, peerdatabase <peerId> display the peerTable\n"
+				+ "\tpdb, peerdatabase <peer>   display the peerTable\n"
 				+ "\tdb, database               display the databse\n"
-				+ "\th, help                    display this usage usage\n\n";
+				+ "\tpg, peerget <peer> <file>  get a remote file\n"
+				+ "\th, help                    display this help message\n";
 		}
 
 		private String prettyPeerTable() {
@@ -130,13 +130,22 @@ class Dumper implements Runnable {
 				if (cmdList.length > 1) {
 					ps.print(prettyPeerDatabase(cmdList[1]));
 				} else {
-					ps.print("Wrong number of argument. pdb usage: pdb <peerId>\n");
+					ps.print("Wrong number of argument. pdb usage: pdb <peer>\n");
 				}
 				break;
 
 			case "database":
 			case "db":
 				ps.print(prettyDatabase(database));
+				break;
+
+			case "peerget":
+			case "pg":
+				if (cmdList.length > 2) {
+					fileDownloader.download(cmdList[1], cmdList[2]);
+				} else {
+					ps.print("Wrong number of argument. pg usage: pg <peer> <file>\n");
+				}
 				break;
 
 			case "help":
