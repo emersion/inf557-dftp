@@ -8,7 +8,7 @@ class Test {
 	private static final int port = 4242;
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
-	private static final Path path = Paths.get("data/");
+	private static final Path sharedDir = Paths.get("shared/");
 
 	private static String local() throws UnknownHostException {
 		String local = InetAddress.getLocalHost().getHostName();
@@ -21,6 +21,7 @@ class Test {
 
 	public static void main(String[] args) throws Exception {
 		String local = local();
+		Path localDir = sharedDir.resolve(local);
 
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
@@ -55,7 +56,10 @@ class Test {
 		new Thread(debugReceiver).start();
 		muxDemux.addHandler(debugReceiver);
 
-		Dumper dumper = new Dumper(port, peerTable, db, path);
+		FileDownloader fileDownloader = new FileDownloader(port, sharedDir, peerTable);
+		new Thread(fileDownloader).start();
+
+		Dumper dumper = new Dumper(port, localDir, peerTable, db, fileDownloader);
 		new Thread(dumper).start();
 
 		muxDemux.run();

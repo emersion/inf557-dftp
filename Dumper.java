@@ -13,21 +13,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 class Dumper implements Runnable {
+	private static final int BACKLOG_SIZE = 3;
+
 	private ServerSocket servSocket;
+	private Path myPath;
 	private PeerTable peerTable;
 	private Database database;
-	private static final int BACKLOG_SIZE = 3;
-	private static Path myPath;
+	private FileDownloader fileDownloader;
 
-	public Dumper(int port, PeerTable pt, Database db, Path myPath) {
-		try {
-			this.servSocket = new ServerSocket(port, BACKLOG_SIZE);
-			this.peerTable = pt;
-			this.database = db;
-			this.myPath = myPath;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public Dumper(int port, Path myPath, PeerTable pt, Database db, FileDownloader fileDownloader) throws IOException {
+		this.servSocket = new ServerSocket(port, BACKLOG_SIZE);
+		this.myPath = myPath;
+		this.peerTable = pt;
+		this.database = db;
+		this.fileDownloader = fileDownloader;
 	}
 
 	private class ClientHandler implements Runnable {
@@ -43,13 +42,14 @@ class Dumper implements Runnable {
 				+ "Commands:\n"
 				+ "\ta, all                         print database, peerTable\n"
 				+ "\tpt, peertable                  display the peerTable\n"
-				+ "\tpadb, peerAllDatabase          display the peer databases\n"
-				+ "\tpdb, peerDatabase <peerId>     display the peerId database\n"
+				+ "\tpadb, peerAllDatabase          display all peer databases\n"
+				+ "\tpdb, peerDatabase <peer>       display a peer's database\n"
 				+ "\tdb, database                   display the database\n"
-				+ "\tudb, updateDatabase [e1,...]   update the database\n"
-				+ "\tget <filename>                 get the corresponding file\n"
+				+ "\tudb, updateDatabase <e1,...>   update the local database\n"
+				+ "\tget <file>                     get a local file\n"
+				+ "\tpg, peerget <peer> <file>      download a remote file\n"
 				+ "\tq, quit                        quit this console\n"
-				+ "\th, help                        display this usage\n\n";
+				+ "\th, help                        display this usage\n";
 		}
 
 		private String prettyPeerTable() {
@@ -153,7 +153,7 @@ class Dumper implements Runnable {
 		}
 
 		private void handleMessage(PrintStream ps, String cmd) {
-			String[] cmdList = cmd.split(" ", 2);
+			String[] cmdList = cmd.split(" ");
 			switch(cmdList[0].toLowerCase()) {
 			case "all":
 			case "a":
@@ -176,7 +176,7 @@ class Dumper implements Runnable {
 				if (cmdList.length > 1) {
 					ps.print(prettyPeerDatabase(cmdList[1]));
 				} else {
-					ps.print("Wrong number of argument. pdb usage: pdb <peerId>\n");
+					ps.print("Wrong number of argument. pdb usage: pdb <peer>\n");
 				}
 				break;
 
@@ -200,6 +200,15 @@ class Dumper implements Runnable {
 					handleGetFile(cmdList[1]);
 				} else {
 					ps.print("No filename specified, get usage: get <filename>\n");
+				}
+				break;
+
+			case "peerget":
+			case "pg":
+				if (cmdList.length > 2) {
+					fileDownloader.download(cmdList[1], cmdList[2]);
+				} else {
+					ps.print("Wrong number of argument. pg usage: pg <peer> <file>\n");
 				}
 				break;
 
