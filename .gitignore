@@ -23,3 +23,6 @@ hs_err_pid*
 
 # ide trash
 .idea
+
+# ignore shared/peers files
+root/
