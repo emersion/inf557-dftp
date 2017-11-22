@@ -36,13 +36,15 @@ class Dumper implements Runnable {
 		private String usage() {
 			return "Usage: <command>\n"
 				+ "Commands:\n"
-				+ "\ta, all                     print databse, peerTable\n"
-				+ "\tpt, peertable              display the peerTable\n"
-				+ "\tpadb, peeralldatabase      display the peerTable\n"
-				+ "\tpdb, peerdatabase <peer>   display the peerTable\n"
-				+ "\tdb, database               display the databse\n"
-				+ "\tpg, peerget <peer> <file>  get a remote file\n"
-				+ "\th, help                    display this help message\n";
+				+ "\ta, all                         print database, peerTable\n"
+				+ "\tpt, peertable                  display the peerTable\n"
+				+ "\tpadb, peerAllDatabase          display all peer databases\n"
+				+ "\tpdb, peerDatabase <peer>       display a peer's database\n"
+				+ "\tdb, database                   display the database\n"
+				+ "\tudb, updateDatabase <e1,...>   update the local database\n"
+				+ "\tpg, peerget <peer> <file>      get a remote file\n"
+				+ "\tq, quit                        quit this console\n"
+				+ "\th, help                        display this usage\n";
 		}
 
 		private String prettyPeerTable() {
@@ -106,6 +108,10 @@ class Dumper implements Runnable {
 			return msg;
 		}
 
+		private void updateDatabase(String[] data) {
+			database.update(data);
+		}
+
 		private void handleMessage(PrintStream ps, String cmd) {
 			String[] cmdList = cmd.split(" ");
 			switch(cmdList[0].toLowerCase()) {
@@ -137,6 +143,16 @@ class Dumper implements Runnable {
 			case "database":
 			case "db":
 				ps.print(prettyDatabase(database));
+				break;
+
+			case "updatedatabase":
+			case "udb":
+				if (cmdList.length > 1) {
+					String[] dbList = cmdList[1].split(",");
+					updateDatabase(dbList);
+				} else {
+					ps.print("No list to update, udb usage: udb [e1,...]");
+				}
 				break;
 
 			case "peerget":
