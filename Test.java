@@ -1,11 +1,14 @@
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class Test {
 	private static final int port = 4242;
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
+	private static final Path path = Paths.get("data/");
 
 	private static String local() throws UnknownHostException {
 		String local = InetAddress.getLocalHost().getHostName();
@@ -52,7 +55,7 @@ class Test {
 		new Thread(debugReceiver).start();
 		muxDemux.addHandler(debugReceiver);
 
-		Dumper dumper = new Dumper(port, peerTable, db);
+		Dumper dumper = new Dumper(port, peerTable, db, path);
 		new Thread(dumper).start();
 
 		muxDemux.run();
