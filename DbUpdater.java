@@ -18,6 +18,14 @@ public class DbUpdater implements Runnable, MessageHandler {
             throw new InvalidParameterException("invalid argument path is null");
         }
 
+        if (interval <= 0) {
+            throw new InvalidParameterException("invalid argument interval is not positive");
+        }
+
+        if (db == null) {
+            throw new InvalidParameterException("invalid argument database is null");
+        }
+
         sharedFolder = new File(sharedFolderPath);
 
         if (!sharedFolder.isDirectory()) {
@@ -43,12 +51,11 @@ public class DbUpdater implements Runnable, MessageHandler {
 
         for (File f: currentDir.listFiles()) {
             if (f.isFile()) {
-                paths.add(dirPath + "/" + f.getName());
+                paths.add(f.getPath());
             }
 
             if (f.isDirectory()) {
-                String newDirPath = currentDir + "/" + f.getName() ;
-                paths.addAll(getListOfPath(new ArrayList<String>(), newDirPath)) ;
+                paths.addAll(getListOfPath(new ArrayList<String>(), f.getPath())) ;
             }
         }
         return paths;
