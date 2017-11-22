@@ -1,14 +1,14 @@
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 class Test {
 	private static final int port = 4242;
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
-	private static final String sharedDir = "shared";
+	private static final Path sharedDir = Paths.get("shared/");
 
 	private static String local() throws UnknownHostException {
 		String local = InetAddress.getLocalHost().getHostName();
@@ -21,7 +21,7 @@ class Test {
 
 	public static void main(String[] args) throws Exception {
 		String local = local();
-		Path sharedDirPath = FileSystems.getDefault().getPath(sharedDir);
+		Path localDir = sharedDir.resolve(local);
 
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
@@ -56,10 +56,10 @@ class Test {
 		new Thread(debugReceiver).start();
 		muxDemux.addHandler(debugReceiver);
 
-		FileDownloader fileDownloader = new FileDownloader(port, sharedDirPath, peerTable);
+		FileDownloader fileDownloader = new FileDownloader(port, sharedDir, peerTable);
 		new Thread(fileDownloader).start();
 
-		Dumper dumper = new Dumper(port, peerTable, db, fileDownloader);
+		Dumper dumper = new Dumper(port, localDir, peerTable, db, fileDownloader);
 		new Thread(dumper).start();
 
 		muxDemux.run();
