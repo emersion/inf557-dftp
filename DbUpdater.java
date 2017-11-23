@@ -68,8 +68,10 @@ public class DbUpdater implements Runnable {
             List<String> paths = getListOfPath(new ArrayList<String>(), sharedFolder.getPath()) ;
             List<String> currentDb = db.data();
 
+            if (paths.size() != currentDb.size()) continue;
+
             for (String path : paths) {
-                if(!currentDb.contains(path) || paths.size() != currentDb.size()){
+                if (!currentDb.contains(path)) {
                     String[] newData = paths.toArray(new String[paths.size()]);
                     db.update(newData);
                     break;
