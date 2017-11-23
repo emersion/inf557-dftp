@@ -4,8 +4,8 @@ import java.net.UnknownHostException;
 
 class Test {
 	private static final int port = 4242;
-	private static final int helloInterval = 3;
-	private static final int synInterval = 5;
+	private static final int helloInterval = 1;
+	private static final int synInterval = 1;
 
 	private static String local() throws UnknownHostException {
 		String local = InetAddress.getLocalHost().getHostName();
