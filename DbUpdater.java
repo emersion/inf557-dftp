@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by sathouel on 22/11/2017.
  */
-public class DbUpdater implements Runnable, MessageHandler {
+public class DbUpdater implements Runnable {
 
     private File sharedFolder;
     private Database db;
@@ -37,11 +37,6 @@ public class DbUpdater implements Runnable, MessageHandler {
     }
 
 
-    @Override
-    public void handleMessage(Envelope msg) {
-        // no op
-    }
-
     public List<String> getListOfPath(List<String> paths, String dirPath) {
 
         File currentDir = new File(dirPath);
@@ -71,8 +66,15 @@ public class DbUpdater implements Runnable, MessageHandler {
             }
 
             List<String> paths = getListOfPath(new ArrayList<String>(), sharedFolder.getPath()) ;
-            String[] newData = paths.toArray(new String[paths.size()]);
-            db.update(newData);
+            List<String> currentDb = db.data();
+
+            for (String path : paths) {
+                if(!currentDb.contains(path) || paths.size() != currentDb.size()){
+                    String[] newData = paths.toArray(new String[paths.size()]);
+                    db.update(newData);
+                    break;
+                }
+            }
 
         }
     }
