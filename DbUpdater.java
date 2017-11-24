@@ -1,7 +1,9 @@
 import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by sathouel on 22/11/2017.
@@ -22,7 +24,7 @@ public class DbUpdater implements Runnable {
             throw new InvalidParameterException("invalid argument interval is not positive");
         }
 
-        if (db == null) {
+        if (database == null) {
             throw new InvalidParameterException("invalid argument database is null");
         }
 
@@ -37,7 +39,7 @@ public class DbUpdater implements Runnable {
     }
 
 
-    public List<String> getListOfPath(List<String> paths, String dirPath) {
+    public Set<String> getListOfPath(Set<String> paths, String dirPath) {
 
         File currentDir = new File(dirPath);
         if (!currentDir.isDirectory()) {
@@ -50,7 +52,7 @@ public class DbUpdater implements Runnable {
             }
 
             if (f.isDirectory()) {
-                paths.addAll(getListOfPath(new ArrayList<String>(), f.getPath())) ;
+                paths.addAll(getListOfPath(new HashSet<String>(), f.getPath())) ;
             }
         }
         return paths;
@@ -65,14 +67,17 @@ public class DbUpdater implements Runnable {
                 break;
             }
 
-            List<String> paths = getListOfPath(new ArrayList<String>(), sharedFolder.getPath()) ;
+            Set<String> paths = getListOfPath(new HashSet<String>(), sharedFolder.getPath()) ;
             List<String> currentDb = db.data();
+            String[] newData = paths.toArray(new String[paths.size()]);
 
-            if (paths.size() != currentDb.size()) continue;
+            if (currentDb.size() != paths.size()) {
+                db.update(newData);
+                continue;
+            }
 
-            for (String path : paths) {
-                if (!currentDb.contains(path)) {
-                    String[] newData = paths.toArray(new String[paths.size()]);
+            for (String path : currentDb) {
+                if (!paths.contains(path)) {
                     db.update(newData);
                     break;
                 }
