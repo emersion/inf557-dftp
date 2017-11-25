@@ -30,6 +30,7 @@ class Test {
 
 		DbUpdater dbUpdater = new DbUpdater(localDir.toString(), dirScanInterval);
 		Database db = dbUpdater.database();
+		new Thread(dbUpdater).start();
 
 		HelloReceiver helloReceiver = new HelloReceiver(peerTable);
 		new Thread(helloReceiver).start();
