@@ -5,83 +5,94 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by sathouel on 22/11/2017.
- */
 public class DbUpdater implements Runnable {
+	private File sharedFolder;
+	private int updateInterval;
 
-    private File sharedFolder;
-    private Database db;
-    private int updateInterval;
+	private Database db = null;
 
-    public DbUpdater(Database database, String sharedFolderPath, int interval){
+	public DbUpdater(String sharedFolderPath, int updateInterval) {
+		if (sharedFolderPath == null) {
+			throw new InvalidParameterException("invalid argument path is null");
+		}
+		if (updateInterval <= 0) {
+			throw new InvalidParameterException("invalid argument interval is not positive");
+		}
 
-        if (sharedFolderPath == null) {
-            throw new InvalidParameterException("invalid argument path is null");
-        }
+		sharedFolder = new File(sharedFolderPath);
+		if (!sharedFolder.isDirectory()) {
+			throw new InvalidParameterException("path provided is not a directory");
+		}
 
-        if (interval <= 0) {
-            throw new InvalidParameterException("invalid argument interval is not positive");
-        }
+		this.updateInterval = updateInterval;
 
-        if (database == null) {
-            throw new InvalidParameterException("invalid argument database is null");
-        }
+		// Initial DB update
+		scan();
+	}
 
-        sharedFolder = new File(sharedFolderPath);
+	public Database database() {
+		return db;
+	}
 
-        if (!sharedFolder.isDirectory()) {
-            throw new InvalidParameterException("path provided is not a directory");
-        }
+	private Set<String> getListOfPath(Set<String> paths, String dirPath) {
+		File currentDir = new File(dirPath);
+		if (!currentDir.isDirectory()) {
+			throw new IllegalArgumentException("wrong dir path");
+		}
 
-        db = database;
-        updateInterval = interval;
-    }
+		for (File f: currentDir.listFiles()) {
+			if (f.isFile()) {
+				paths.add(f.getPath());
+			}
 
+			if (f.isDirectory()) {
+				paths.addAll(getListOfPath(new HashSet<String>(), f.getPath())) ;
+			}
+		}
+		return paths;
+	}
 
-    public Set<String> getListOfPath(Set<String> paths, String dirPath) {
+	private void update(Set<String> paths) {
+		String[] pathsArray = paths.toArray(new String[paths.size()]);
+		if (db == null) {
+			db = new Database(pathsArray, 0);
+		} else {
+			db.update(pathsArray);
+		}
+	}
 
-        File currentDir = new File(dirPath);
-        if (!currentDir.isDirectory()) {
-            throw new IllegalArgumentException("wrong dir path");
-        }
+	private void scan() {
+		Set<String> paths = getListOfPath(new HashSet<String>(), sharedFolder.getPath());
+		if (db == null) {
+			update(paths);
+			return;
+		}
 
-        for (File f: currentDir.listFiles()) {
-            if (f.isFile()) {
-                paths.add(f.getPath());
-            }
+		List<String> currentDb = db.data();
 
-            if (f.isDirectory()) {
-                paths.addAll(getListOfPath(new HashSet<String>(), f.getPath())) ;
-            }
-        }
-        return paths;
-    }
+		if (currentDb.size() != paths.size()) {
+			update(paths);
+			return;
+		}
 
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                Thread.sleep(updateInterval * 1000);
-            } catch (InterruptedException e) {
-                break;
-            }
+		for (String path : currentDb) {
+			if (!paths.contains(path)) {
+				update(paths);
+				return;
+			}
+		}
+	}
 
-            Set<String> paths = getListOfPath(new HashSet<String>(), sharedFolder.getPath()) ;
-            List<String> currentDb = db.data();
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				Thread.sleep(updateInterval * 1000);
+			} catch (InterruptedException e) {
+				break;
+			}
 
-            if (currentDb.size() != paths.size()) {
-                db.update(paths.toArray(new String[paths.size()]));
-                continue;
-            }
-
-            for (String path : currentDb) {
-                if (!paths.contains(path)) {
-                    db.update(paths.toArray(new String[paths.size()]));
-                    break;
-                }
-            }
-
-        }
-    }
+			scan();
+		}
+	}
 }
