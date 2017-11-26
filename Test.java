@@ -8,6 +8,7 @@ class Test {
 	private static final int port = 4242;
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
+	private static final int dirScanInterval = 10;
 	private static final Path sharedDir = Paths.get("shared/");
 
 	private static String local() throws UnknownHostException {
@@ -26,7 +27,10 @@ class Test {
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
 		PeerTable peerTable = new PeerTable();
-		Database db = new Database(new String[]{"Hello", "World"}, 0);
+
+		DbUpdater dbUpdater = new DbUpdater(localDir.toString(), dirScanInterval);
+		Database db = dbUpdater.database();
+		new Thread(dbUpdater).start();
 
 		HelloReceiver helloReceiver = new HelloReceiver(peerTable);
 		new Thread(helloReceiver).start();
