@@ -5,7 +5,6 @@ import java.util.concurrent.BlockingQueue;
 
 class ListSender implements MessageHandler, Runnable {
 	private MuxDemux muxDemux;
-	private PeerTable peerTable;
 	private Database db;
 	private String local;
 
@@ -21,9 +20,8 @@ class ListSender implements MessageHandler, Runnable {
 		}
 	}
 
-	public ListSender(MuxDemux muxDemux, PeerTable peerTable, Database db, String local) {
+	public ListSender(MuxDemux muxDemux, Database db, String local) {
 		this.muxDemux = muxDemux;
-		this.peerTable = peerTable;
 		this.db = db;
 		this.local = local;
 	}

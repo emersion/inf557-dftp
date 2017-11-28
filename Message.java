@@ -7,6 +7,7 @@ abstract class Message {
 	private static final String HELLO = "HELLO";
 	private static final String SYN = "SYN";
 	private static final String LIST = "LIST";
+	private static final String DYING = "DYING";
 
 	abstract public String format();
 
@@ -21,6 +22,8 @@ abstract class Message {
 			return new Syn(parts);
 		case LIST:
 			return new List(parts);
+		case DYING:
+			return new Dying(parts);
 		default:
 			throw new IllegalArgumentException("unknown message type: "+type);
 		}
@@ -275,6 +278,42 @@ abstract class Message {
 					" totalParts="+String.valueOf(this.totalParts)+
 					" partNum="+String.valueOf(this.partNum)+
 					" data="+this.data+"}";
+		}
+	}
+
+	public static class Dying extends Message {
+		public final String sender;
+
+		public Dying(String sender) {
+			if (!idPattern.matcher(sender).matches()) {
+				throw new IllegalArgumentException("invalid sender ID");
+			}
+
+			this.sender = sender;
+		}
+
+		public Dying(String[] parts) {
+			if (parts.length < 2) {
+				throw new IllegalArgumentException("wrong number of fields");
+			}
+
+			if (!DYING.equals(parts[0])) {
+				throw new IllegalArgumentException("not a SYN message");
+			}
+
+			this.sender = parts[1];
+			if (!idPattern.matcher(this.sender).matches()) {
+				throw new IllegalArgumentException("invalid sender ID");
+			}
+		}
+
+		@Override
+		public String format() {
+			return DYING+";"+this.sender+";";
+		}
+
+		public String toString() {
+			return "DYING{sender="+this.sender+"}";
 		}
 	}
 }

@@ -83,9 +83,26 @@ class PeerTable {
 			rec.expiresAt = Instant.now().plus(expiration);
 			rec.pendingSeqNum = seqNum;
 
-			if (rec.seqNum() < seqNum) {
+			if (rec.seqNum() < seqNum && rec.state != State.DYING) {
 				rec.state = State.INCONSISTENT;
 			}
+		}
+
+		cleanup();
+	}
+
+	public synchronized void die(String id, InetAddress address) {
+		Record rec = records.get(id);
+		if (rec == null) {
+			return;
+		}
+
+		if (!address.equals(rec.address)) {
+			throw new IllegalArgumentException("got two different IP addresses for the same peer ID");
+		}
+
+		synchronized (rec) {
+			rec.state = State.DYING;
 		}
 
 		cleanup();
@@ -103,7 +120,9 @@ class PeerTable {
 			} else {
 				rec.db.update(data, seqNum);
 			}
-			rec.state = State.SYNCHRONIZED;
+			if (rec.state != State.DYING) {
+				rec.state = State.SYNCHRONIZED;
+			}
 		}
 	}
 

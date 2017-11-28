@@ -27,7 +27,7 @@ class SynSender implements MessageHandler, Runnable {
 			}
 
 			for (PeerTable.Record rec : peerTable.records()) {
-				if (rec.state() != PeerTable.State.SYNCHRONIZED) {
+				if (rec.state() == PeerTable.State.HEARD || rec.state() == PeerTable.State.INCONSISTENT) {
 					Message.Syn syn = new Message.Syn(local, rec.id, rec.pendingSeqNum());
 					Envelope env = new Envelope(rec.address, syn);
 					muxDemux.send(env);
