@@ -36,8 +36,8 @@ class ListSender implements MessageHandler, Runnable {
 	 * Requests to send the local database to a remote peer.
 	 */
 	public synchronized void sendTo(InetAddress address, String id) {
-		// check if already queued
-		for (Request req : outgoing){
+		// Check if already queued
+		for (Request req : outgoing) {
 			if (address.equals(req.address) && id.equals(req.id)) {
 				return;
 			}
