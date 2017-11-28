@@ -42,6 +42,13 @@ class FileDownloader implements Runnable {
 	}
 
 	public void download(String peer, String filename) {
+		// Check if already queued
+		for (Request req : requests) {
+			if (peer.equals(req.peer) && filename.equals(req.filename)) {
+				return;
+			}
+		}
+
 		requests.offer(new Request(peer, filename));
 	}
 
