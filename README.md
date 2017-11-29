@@ -9,4 +9,4 @@ make
 make run
 ```
 
-Create a directory `shared/<hostname>`. Put files to share in it. Profit.
+Put files to share in `shared/<hostname>`. Profit.
