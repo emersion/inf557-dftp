@@ -51,7 +51,7 @@ public class DbUpdater implements Runnable {
 
 		for (File f: currentDir.listFiles()) {
 			if (f.isFile()) {
-				paths.add(f.getPath());
+				paths.add(sharedFolder.toPath().relativize(f.toPath()).toString());
 			}
 
 			if (f.isDirectory()) {
