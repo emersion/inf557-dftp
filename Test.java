@@ -9,6 +9,8 @@ class Test {
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
 	private static final int dirScanInterval = 10;
+	private static final int dyingInterval = 100;
+	private static final int dyingCount = 3;
 	private static final Path sharedDir = Paths.get("shared/");
 
 	private static String local() throws UnknownHostException {
@@ -40,7 +42,7 @@ class Test {
 		new Thread(helloSender).start();
 		muxDemux.addHandler(helloSender);
 
-		ListSender listSender = new ListSender(muxDemux, peerTable, db, local);
+		ListSender listSender = new ListSender(muxDemux, db, local);
 		new Thread(listSender).start();
 		muxDemux.addHandler(listSender);
 
@@ -65,6 +67,15 @@ class Test {
 
 		Dumper dumper = new Dumper(port, localDir, peerTable, db, fileDownloader);
 		new Thread(dumper).start();
+
+		// TODO: stop all other senders when shutting down
+		DyingSender dyingSender = new DyingSender(muxDemux, local, dyingInterval, dyingCount);
+		Runtime.getRuntime().addShutdownHook(new Thread(dyingSender));
+		muxDemux.addHandler(dyingSender);
+
+		DyingReceiver dyingReceiver = new DyingReceiver(muxDemux, peerTable);
+		new Thread(dyingReceiver).start();
+		muxDemux.addHandler(dyingReceiver);
 
 		muxDemux.run();
 	}

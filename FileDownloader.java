@@ -99,6 +99,9 @@ class FileDownloader implements Runnable {
 		if (rec == null) {
 			throw new RuntimeException("requested a file download from an unknown peer: "+req.peer);
 		}
+		if (rec.state() == PeerTable.State.DYING) {
+			throw new RuntimeException("requested a file download from a dying peer: "+req.peer);
+		}
 
 		Path peerDir = directory.resolve(req.peer);
 		Path filepath = peerDir.resolve(req.filename).normalize();

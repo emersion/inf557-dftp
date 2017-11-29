@@ -79,6 +79,8 @@ class ListReceiver implements MessageHandler, Runnable {
 	}
 
 	public void run() {
+		// TODO: periodically cleanup this.pending
+
 		while (true) {
 			Envelope env;
 			try {
@@ -102,6 +104,11 @@ class ListReceiver implements MessageHandler, Runnable {
 			PeerTable.Record rec = peerTable.get(list.sender);
 			if (rec.state() == PeerTable.State.SYNCHRONIZED) {
 				// Already synchronized, we don't need this LIST message
+				continue;
+			}
+			if (rec.state() == PeerTable.State.DYING) {
+				// Peer is dying, throw away everything related to it
+				pending.remove(list.sender);
 				continue;
 			}
 			if (list.seqNum < rec.pendingSeqNum()) {
