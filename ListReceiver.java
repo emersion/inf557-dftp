@@ -3,6 +3,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.Map;
 import java.util.HashMap;
 
+/**
+ * Handles LIST messages, groups them by (peer, sequence number) and
+ * synchronizes the peer table when the database is complete.
+ */
 class ListReceiver implements MessageHandler, Runnable {
 	private PeerTable peerTable;
 	private String local;

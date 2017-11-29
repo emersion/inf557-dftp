@@ -1,3 +1,6 @@
+/**
+ * Periodically broadcasts HELLO messages.
+ */
 class HelloSender implements Runnable {
 	private MuxDemux muxDemux;
 	private PeerTable peerTable;

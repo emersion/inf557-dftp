@@ -1,3 +1,6 @@
+/**
+ * Sends a few DYING messages when run.
+ */
 class DyingSender implements Runnable {
 	private MuxDemux muxDemux;
 	private Database db;

@@ -2,6 +2,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A versioned database containing an array of strings.
+ */
 class Database {
 	private String[] data;
 	private int seqNum;
@@ -15,7 +18,7 @@ class Database {
 	}
 
 	/**
-	 * Update the database. A database can only be updated with strictly
+	 * Updates the database. A database can only be updated with strictly
 	 * increasing sequence numbers.
 	 */
 	public synchronized void update(String[] data, int seqNum) {
@@ -27,11 +30,18 @@ class Database {
 		this.seqNum = seqNum;
 	}
 
+	/**
+	 * Updates the database. The database's sequence number is automatically
+	 * incremented.
+	 */
 	public synchronized void update(String[] data) {
 		this.data = data;
 		this.seqNum++;
 	}
 
+	/**
+	 * Returns this database's data as a read-only list.
+	 */
 	public synchronized List<String> data() {
 		return Collections.unmodifiableList(Arrays.asList(data));
 	}

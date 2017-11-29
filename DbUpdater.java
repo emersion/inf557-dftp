@@ -5,6 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Maintains a database of all file paths in a given directory. The database is
+ * updated periodically.
+ *
+ * This class has ownership over the database it holds.
+ */
 public class DbUpdater implements Runnable {
 	private File sharedFolder;
 	private int updateInterval;
@@ -34,6 +40,9 @@ public class DbUpdater implements Runnable {
 		return db;
 	}
 
+	/**
+	 * Traverses `dirPath` and recursively adds all file paths to `paths`.
+	 */
 	private Set<String> getListOfPath(Set<String> paths, String dirPath) {
 		File currentDir = new File(dirPath);
 		if (!currentDir.isDirectory()) {
@@ -52,6 +61,10 @@ public class DbUpdater implements Runnable {
 		return paths;
 	}
 
+	/**
+	 * Updates the database with a new list of paths. If the database doesn't
+	 * exist it's created.
+	 */
 	private void update(Set<String> paths) {
 		String[] pathsArray = paths.toArray(new String[paths.size()]);
 		if (db == null) {
@@ -61,6 +74,9 @@ public class DbUpdater implements Runnable {
 		}
 	}
 
+	/**
+	 * Scans the directory and updates the database if necessary.
+	 */
 	private void scan() {
 		Set<String> paths = getListOfPath(new HashSet<String>(), sharedFolder.getPath());
 		if (db == null) {
