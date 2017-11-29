@@ -40,11 +40,9 @@ class Test {
 
 		HelloSender helloSender = new HelloSender(muxDemux, peerTable, db, local, helloInterval);
 		new Thread(helloSender).start();
-		muxDemux.addHandler(helloSender);
 
 		ListSender listSender = new ListSender(muxDemux, db, local);
 		new Thread(listSender).start();
-		muxDemux.addHandler(listSender);
 
 		ListReceiver listReceiver = new ListReceiver(peerTable, local);
 		new Thread(listReceiver).start();
@@ -52,7 +50,6 @@ class Test {
 
 		SynSender synSender = new SynSender(muxDemux, peerTable, local, synInterval);
 		new Thread(synSender).start();
-		muxDemux.addHandler(synSender);
 
 		SynReceiver synReceiver = new SynReceiver(muxDemux, peerTable, listSender, local);
 		new Thread(synReceiver).start();
@@ -71,7 +68,6 @@ class Test {
 		// TODO: stop all other senders when shutting down
 		DyingSender dyingSender = new DyingSender(muxDemux, local, dyingInterval, dyingCount);
 		Runtime.getRuntime().addShutdownHook(new Thread(dyingSender));
-		muxDemux.addHandler(dyingSender);
 
 		DyingReceiver dyingReceiver = new DyingReceiver(muxDemux, peerTable);
 		new Thread(dyingReceiver).start();

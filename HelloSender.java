@@ -1,4 +1,4 @@
-class HelloSender implements MessageHandler, Runnable {
+class HelloSender implements Runnable {
 	private MuxDemux muxDemux;
 	private PeerTable peerTable;
 	private Database db;
@@ -11,10 +11,6 @@ class HelloSender implements MessageHandler, Runnable {
 		this.db = db;
 		this.local = local;
 		this.helloInterval = helloInterval;
-	}
-
-	public void handleMessage(Envelope msg) {
-		// No-op
 	}
 
 	public void run() {
