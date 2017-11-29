@@ -8,8 +8,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * A peer table holds information about all known peers.
+ *
+ * It notifies when a peer is added or removed and when a peer's state changes.
+ */
 class PeerTable {
 	private static final Duration expiration = Duration.ofSeconds(10);
+	private static final Duration minSynInterval = Duration.ofSeconds(1);
 
 	enum State {HEARD, INCONSISTENT, SYNCHRONIZED, DYING}
 
@@ -19,6 +25,7 @@ class PeerTable {
 
 		protected int pendingSeqNum = Integer.MIN_VALUE;
 		protected Instant expiresAt = null;
+		protected Instant nextSynAt = null;
 		protected State state = State.HEARD;
 		protected Database db = null;
 
@@ -48,13 +55,37 @@ class PeerTable {
 			return state;
 		}
 
+		/**
+		 * Returns the synchronized database of a peer. If the database hasn't been
+		 * synchronized yet, returns null.
+		 */
 		public synchronized Database database() {
 			return db;
+		}
+
+		/**
+		 * Checks whether a synchronize request needs to be sent to this peer.
+		 * This method ensures that the peer is in a state needing synchronization
+		 * and that a synchronization request hasn't been sent for a while.
+		 */
+		public synchronized boolean requestSynchronize() {
+			if (state != State.HEARD && state != State.INCONSISTENT) {
+				return false;
+			}
+			Instant now = Instant.now();
+			if (nextSynAt != null && !now.isAfter(nextSynAt)) {
+				return false;
+			}
+			nextSynAt = now.plus(minSynInterval);
+			return true;
 		}
 	}
 
 	private Map<String, Record> records = new HashMap<>();
 
+	/**
+	 * Returns a read-only list of all peer records in the peer table.
+	 */
 	public synchronized List<Record> records() {
 		cleanup();
 		List<Record> list = new ArrayList<>();
@@ -64,10 +95,19 @@ class PeerTable {
 		return Collections.unmodifiableList(list);
 	}
 
+	/**
+	 * Returns a single peer record from the peer table. Returns null if the peer
+	 * is unknown.
+	 */
 	public synchronized Record get(String id) {
 		return records.get(id);
 	}
 
+	/**
+	 * Updates a peer's sequence number in the peer table. This method fails with
+	 * an exception if the address is incorrect (meaning the sender is spoofing
+	 * someone else's peer ID).
+	 */
 	public synchronized void update(String id, InetAddress address, int seqNum) {
 		Record rec = records.get(id);
 		if (rec == null) {
@@ -89,8 +129,13 @@ class PeerTable {
 		}
 
 		cleanup();
+		this.notify();
 	}
 
+	/**
+	 * Marks a peer as dying. This method fails with an exception if the address
+	 * is incorrect.
+	 */
 	public synchronized void die(String id, InetAddress address) {
 		Record rec = records.get(id);
 		if (rec == null) {
@@ -106,8 +151,12 @@ class PeerTable {
 		}
 
 		cleanup();
+		this.notify();
 	}
 
+	/**
+	 * Synchronizes a peer's database.
+	 */
 	public synchronized void synchronize(String id, String[] data, int seqNum) {
 		Record rec = records.get(id);
 		if (rec == null) {
@@ -124,8 +173,15 @@ class PeerTable {
 				rec.state = State.SYNCHRONIZED;
 			}
 		}
+
+		cleanup();
+		this.notify();
 	}
 
+	/**
+	 * Prunes expired peers in the peer table. Notifies if the peer table has
+	 * changed.
+	 */
 	private synchronized void cleanup() {
 		ArrayList<String> toRemove = new ArrayList<>();
 		Instant now = Instant.now();
@@ -136,6 +192,9 @@ class PeerTable {
 		}
 		for (String id : toRemove) {
 			records.remove(id);
+		}
+		if (toRemove.size() > 0) {
+			this.notify();
 		}
 	}
 }
