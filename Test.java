@@ -3,6 +3,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.io.File;
 
 class Test {
 	private static final int port = 4242;
@@ -25,6 +26,9 @@ class Test {
 	public static void main(String[] args) throws Exception {
 		String local = local();
 		Path localDir = sharedDir.resolve(local);
+
+		// Ensure the local directory exists
+		new File(localDir.toString()).mkdirs();
 
 		DatagramSocket socket = new DatagramSocket(port);
 		MuxDemux muxDemux = new MuxDemux(socket);
