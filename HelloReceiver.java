@@ -6,11 +6,13 @@ import java.util.concurrent.BlockingQueue;
  */
 class HelloReceiver implements MessageHandler, Runnable {
 	private PeerTable peerTable;
+	private String local;
 
 	private BlockingQueue<Envelope> incoming = new ArrayBlockingQueue<>(32);
 
-	public HelloReceiver(PeerTable peerTable) {
+	public HelloReceiver(PeerTable peerTable, String local) {
 		this.peerTable = peerTable;
+		this.local = local;
 	}
 
 	public void handleMessage(Envelope env) {
@@ -30,6 +32,10 @@ class HelloReceiver implements MessageHandler, Runnable {
 				break;
 			}
 			Message.Hello hello = (Message.Hello)env.msg;
+
+			if (local.equals(hello.sender)) {
+				continue; // It's our own HELLO
+			}
 
 			try {
 				peerTable.update(hello.sender, env.address, hello.seqNum);

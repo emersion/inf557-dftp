@@ -39,7 +39,7 @@ class Dftp {
 		Database db = dbUpdater.database();
 		new Thread(dbUpdater).start();
 
-		HelloReceiver helloReceiver = new HelloReceiver(peerTable);
+		HelloReceiver helloReceiver = new HelloReceiver(peerTable, local);
 		new Thread(helloReceiver).start();
 		muxDemux.addHandler(helloReceiver);
 
