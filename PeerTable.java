@@ -8,8 +8,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * A peer table holds information about all known peers.
+ *
+ * It notifies when a peer is added or removed and when a peer's state changes.
+ */
 class PeerTable {
 	private static final Duration expiration = Duration.ofSeconds(10);
+	private static final Duration minSynInterval = Duration.ofSeconds(1);
 
 	enum State {HEARD, INCONSISTENT, SYNCHRONIZED, DYING}
 
@@ -19,6 +25,7 @@ class PeerTable {
 
 		protected int pendingSeqNum = Integer.MIN_VALUE;
 		protected Instant expiresAt = null;
+		protected Instant nextSynAt = null;
 		protected State state = State.HEARD;
 		protected Database db = null;
 
@@ -50,6 +57,21 @@ class PeerTable {
 
 		public synchronized Database database() {
 			return db;
+		}
+
+		/**
+		 * Checks whether a synchronize request needs to be sent to this peer.
+		 */
+		public synchronized boolean requestSynchronize() {
+			if (state != State.HEARD && state != State.INCONSISTENT) {
+				return false;
+			}
+			Instant now = Instant.now();
+			if (nextSynAt != null && !now.isAfter(nextSynAt)) {
+				return false;
+			}
+			nextSynAt = now.plus(minSynInterval);
+			return true;
 		}
 	}
 
@@ -89,6 +111,7 @@ class PeerTable {
 		}
 
 		cleanup();
+		this.notify();
 	}
 
 	public synchronized void die(String id, InetAddress address) {
@@ -106,6 +129,7 @@ class PeerTable {
 		}
 
 		cleanup();
+		this.notify();
 	}
 
 	public synchronized void synchronize(String id, String[] data, int seqNum) {
@@ -124,6 +148,9 @@ class PeerTable {
 				rec.state = State.SYNCHRONIZED;
 			}
 		}
+
+		cleanup();
+		this.notify();
 	}
 
 	private synchronized void cleanup() {
@@ -136,6 +163,9 @@ class PeerTable {
 		}
 		for (String id : toRemove) {
 			records.remove(id);
+		}
+		if (toRemove.size() > 0) {
+			this.notify();
 		}
 	}
 }

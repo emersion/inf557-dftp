@@ -21,13 +21,15 @@ class SynSender implements MessageHandler, Runnable {
 	public void run() {
 		while (true) {
 			try {
-				Thread.sleep(synInterval * 1000);
+				synchronized (peerTable) {
+					peerTable.wait(synInterval * 1000);
+				}
 			} catch (InterruptedException e) {
 				break;
 			}
 
 			for (PeerTable.Record rec : peerTable.records()) {
-				if (rec.state() == PeerTable.State.HEARD || rec.state() == PeerTable.State.INCONSISTENT) {
+				if (rec.requestSynchronize()) {
 					Message.Syn syn = new Message.Syn(local, rec.id, rec.pendingSeqNum());
 					Envelope env = new Envelope(rec.address, syn);
 					muxDemux.send(env);
