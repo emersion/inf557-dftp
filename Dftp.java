@@ -5,11 +5,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.File;
 
-class Test {
+class Dftp {
 	private static final int port = 4242;
 	private static final int helloInterval = 1;
 	private static final int synInterval = 1;
 	private static final int dirScanInterval = 10;
+	private static final int scheduleInterval = 1;
 	private static final int dyingInterval = 100;
 	private static final int dyingCount = 3;
 	private static final Path sharedDir = Paths.get("shared/");
@@ -63,12 +64,6 @@ class Test {
 		new Thread(debugReceiver).start();
 		muxDemux.addHandler(debugReceiver);
 
-		FileDownloader fileDownloader = new FileDownloader(port, sharedDir, peerTable);
-		new Thread(fileDownloader).start();
-
-		Dumper dumper = new Dumper(port, localDir, peerTable, db, fileDownloader);
-		new Thread(dumper).start();
-
 		// TODO: stop all other senders when shutting down
 		DyingSender dyingSender = new DyingSender(muxDemux, local, dyingInterval, dyingCount);
 		Runtime.getRuntime().addShutdownHook(new Thread(dyingSender));
@@ -76,6 +71,15 @@ class Test {
 		DyingReceiver dyingReceiver = new DyingReceiver(muxDemux, peerTable);
 		new Thread(dyingReceiver).start();
 		muxDemux.addHandler(dyingReceiver);
+
+		FileDownloader fileDownloader = new FileDownloader(port, sharedDir, peerTable);
+		new Thread(fileDownloader).start();
+
+		Dumper dumper = new Dumper(port, localDir, peerTable, db, fileDownloader);
+		new Thread(dumper).start();
+
+		DownloadScheduler downloadScheduler = new DownloadScheduler(peerTable, fileDownloader, scheduleInterval);
+		new Thread(downloadScheduler).start();
 
 		muxDemux.run();
 	}
