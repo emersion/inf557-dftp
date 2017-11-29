@@ -1,4 +1,4 @@
-class DyingSender implements MessageHandler, Runnable {
+class DyingSender implements Runnable {
 	private MuxDemux muxDemux;
 	private Database db;
 	private String local;
@@ -10,10 +10,6 @@ class DyingSender implements MessageHandler, Runnable {
 		this.local = local;
 		this.dyingInterval = dyingInterval;
 		this.dyingCount = dyingCount;
-	}
-
-	public void handleMessage(Envelope msg) {
-		// No-op
 	}
 
 	public void run() {

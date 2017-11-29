@@ -1,7 +1,7 @@
 /**
  * Periodically sends synchronization requests to unsynchronized peers.
  */
-class SynSender implements MessageHandler, Runnable {
+class SynSender implements Runnable {
 	private MuxDemux muxDemux;
 	private PeerTable peerTable;
 	private String local;
@@ -12,10 +12,6 @@ class SynSender implements MessageHandler, Runnable {
 		this.peerTable = peerTable;
 		this.local = local;
 		this.synInterval = synInterval;
-	}
-
-	public void handleMessage(Envelope msg) {
-		// No-op
 	}
 
 	public void run() {

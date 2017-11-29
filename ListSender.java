@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-class ListSender implements MessageHandler, Runnable {
+class ListSender implements Runnable {
 	private MuxDemux muxDemux;
 	private Database db;
 	private String local;
@@ -24,10 +24,6 @@ class ListSender implements MessageHandler, Runnable {
 		this.muxDemux = muxDemux;
 		this.db = db;
 		this.local = local;
-	}
-
-	public void handleMessage(Envelope msg) {
-		// No-op
 	}
 
 	/**
