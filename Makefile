@@ -5,7 +5,7 @@ all: $(patsubst %.java, %.class, $(wildcard *.java))
 
 .PHONY: run
 run:
-	java Test
+	java Dftp
 
 .PHONY: clean
 clean:
