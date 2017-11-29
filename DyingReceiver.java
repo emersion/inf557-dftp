@@ -1,6 +1,9 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Updates the peer table when a DYING message is received.
+ */
 class DyingReceiver implements MessageHandler, Runnable {
 	private MuxDemux muxDemux;
 	private PeerTable peerTable;

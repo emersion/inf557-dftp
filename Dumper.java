@@ -12,6 +12,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Implements a simple TCP console. This is used by other peers to download
+ * files, and is useful for debugging.
+ *
+ * Run `ncat 127.0.0.1 4242` to use it.
+ */
 class Dumper implements Runnable {
 	private static final int BACKLOG_SIZE = 3;
 

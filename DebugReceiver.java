@@ -1,6 +1,9 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Prints all messages to stdout.
+ */
 class DebugReceiver implements MessageHandler, Runnable {
 	BlockingQueue<Envelope> incoming = new ArrayBlockingQueue<>(32);
 

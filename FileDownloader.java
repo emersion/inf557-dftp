@@ -15,6 +15,9 @@ import java.nio.file.Path;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Downloads files from other peers using a TCP socket.
+ */
 class FileDownloader implements Runnable {
 	private static final int CONNECT_TIMEOUT = 30;
 	private static final int READ_TIMEOUT = 10;
@@ -22,14 +25,6 @@ class FileDownloader implements Runnable {
 	private int port;
 	private Path directory;
 	private PeerTable peerTable;
-
-	private BlockingQueue<Request> requests = new ArrayBlockingQueue<>(32);
-
-	public FileDownloader(int port, Path directory, PeerTable peerTable) {
-		this.port = port;
-		this.directory = directory;
-		this.peerTable = peerTable;
-	}
 
 	private static class Request {
 		public final String peer;
@@ -39,6 +34,14 @@ class FileDownloader implements Runnable {
 			this.peer = peer;
 			this.filename = filename;
 		}
+	}
+
+	private BlockingQueue<Request> requests = new ArrayBlockingQueue<>(32);
+
+	public FileDownloader(int port, Path directory, PeerTable peerTable) {
+		this.port = port;
+		this.directory = directory;
+		this.peerTable = peerTable;
 	}
 
 	public void download(String peer, String filename) {
@@ -53,7 +56,7 @@ class FileDownloader implements Runnable {
 	}
 
 	/**
-	 * Copies data from r to w with a buffer.
+	 * Copies data from r to w with a buffer. This should really be in the stdlib.
 	 *
 	 * TODO: if EOF is encountered before reading len bytes, no error is raised.
 	 * @param  Writer      w   The writer to write data to.

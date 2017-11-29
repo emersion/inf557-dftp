@@ -1,6 +1,9 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Asks the `ListSender` to send LIST messages when a SYN is received.
+ */
 class SynReceiver implements MessageHandler, Runnable {
 	private MuxDemux muxDemux;
 	private PeerTable peerTable;

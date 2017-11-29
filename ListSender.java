@@ -3,6 +3,9 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Sends LIST messages from the local database to other peers.
+ */
 class ListSender implements Runnable {
 	private MuxDemux muxDemux;
 	private Database db;

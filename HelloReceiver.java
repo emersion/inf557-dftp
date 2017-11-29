@@ -1,6 +1,9 @@
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * Updates the peer table when HELLO messages are received.
+ */
 class HelloReceiver implements MessageHandler, Runnable {
 	private PeerTable peerTable;
 

@@ -10,6 +10,9 @@ import java.net.SocketException;
 import java.net.DatagramPacket;
 import java.net.UnknownHostException;
 
+/**
+ * A message multiplexer and demultiplexer over UDP.
+ */
 class MuxDemux implements Runnable {
 	private static final int RECEIVE_BUFFER_SIZE = 2048;
 
@@ -51,7 +54,7 @@ class MuxDemux implements Runnable {
 
 	private class ReceiverWorker implements Runnable {
 		public void run() {
-			// TODO: UTF-8 messages can be truncated in the middle of a codepoint
+			// TODO: messages too large will be truncated
 			byte[] buf = new byte[RECEIVE_BUFFER_SIZE];
 			DatagramPacket packet = new DatagramPacket(buf, buf.length);
 			while (true) {
